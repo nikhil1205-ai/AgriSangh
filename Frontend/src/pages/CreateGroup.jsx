@@ -2,6 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createGroup } from "../services/dashboardService";
 import { useAuth } from "../hooks/useAuth";
+import { motion } from 'framer-motion';
+import { 
+  Users, 
+  MapPin, 
+  Sprout, 
+  Calendar, 
+  Maximize, 
+  FileText, 
+  PlusCircle, 
+  ShieldCheck 
+} from 'lucide-react';
 
 const CreateGroup = () => {
   const navigate = useNavigate();
@@ -17,28 +28,100 @@ const CreateGroup = () => {
     description: "",
   });
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const submit = async (e) => {
     e.preventDefault();
     const group = await createGroup(form);
+    // Role automatically transitions upon successful verification
     setProfile((prev) => ({ ...prev, role: "leader", groupId: group.id }));
     navigate(`/leader/group/${group.id}`);
   };
 
   return (
-    <div className="max-w-3xl bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-      <h1 className="text-2xl font-bold text-gray-900">Create Collective Group</h1>
-      <p className="text-sm text-gray-600 mt-1">After creation, your role auto-upgrades from farmer to leader.</p>
-      <form onSubmit={submit} className="grid md:grid-cols-2 gap-3 mt-5">
-        <input className="border rounded-lg px-3 py-2" placeholder="Group Name" value={form.groupName} onChange={(e) => setForm((p) => ({ ...p, groupName: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="State" value={form.state} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="District" value={form.district} onChange={(e) => setForm((p) => ({ ...p, district: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="Village" value={form.village} onChange={(e) => setForm((p) => ({ ...p, village: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="Crop Focus" value={form.cropFocus} onChange={(e) => setForm((p) => ({ ...p, cropFocus: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="Crop Season" value={form.cropSeason} onChange={(e) => setForm((p) => ({ ...p, cropSeason: e.target.value }))} />
-        <input className="border rounded-lg px-3 py-2" placeholder="Total Expected Land" value={form.totalExpectedLand} onChange={(e) => setForm((p) => ({ ...p, totalExpectedLand: e.target.value }))} />
-        <textarea className="border rounded-lg px-3 py-2 md:col-span-2" placeholder="Description/About Group" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
-        <button className="md:col-span-2 bg-green-800 text-white rounded-lg py-2 font-semibold">Create Group Room</button>
-      </form>
+    /* Centering Wrapper: Centers component in the middle area */
+    <div className="min-h-[80vh] w-full flex items-center justify-center p-4 md:p-8">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-3xl bg-white border border-gray-200 rounded-3xl p-6 md:p-10 shadow-xl shadow-gray-200/40"
+      >
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 bg-green-50 rounded-xl">
+              <PlusCircle className="text-green-800" size={24} />
+            </div>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              Create Collective Group
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-2 bg-green-50 border border-green-100 text-green-800 px-4 py-2.5 rounded-xl">
+            <ShieldCheck size={18} className="shrink-0" />
+            <p className="text-xs font-bold uppercase tracking-widest leading-none">
+              Institutional Upgrade: Farmer → Group Leader[cite: 3]
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={submit} className="grid md:grid-cols-2 gap-4">
+          <div className="md:col-span-2 relative group">
+            <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-800" size={18} />
+            <input
+              name="groupName"
+              placeholder="Collective Group Name"
+              value={form.groupName}
+              onChange={handleChange}
+              required
+              className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-800 outline-none transition-all text-sm"
+            />
+          </div>
+
+          {[
+            { icon: MapPin, name: "state", placeholder: "State" },
+            { icon: MapPin, name: "district", placeholder: "District" },
+            { icon: MapPin, name: "village", placeholder: "Village" },
+            { icon: Sprout, name: "cropFocus", placeholder: "Crop Focus" },
+            { icon: Calendar, name: "cropSeason", placeholder: "Crop Season" },
+            { icon: Maximize, name: "totalExpectedLand", placeholder: "Total Land (Acres)" },
+          ].map((field) => (
+            <div key={field.name} className="relative group">
+              <field.icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-800" size={18} />
+              <input
+                name={field.name}
+                placeholder={field.placeholder}
+                value={form[field.name]}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-800 outline-none transition-all text-sm"
+              />
+            </div>
+          ))}
+
+          <div className="md:col-span-2 relative group">
+            <FileText className="absolute left-4 top-4 text-gray-400 group-focus-within:text-green-800" size={18} />
+            <textarea
+              name="description"
+              placeholder="Describe the Collective Group's goals..."
+              value={form.description}
+              onChange={handleChange}
+              rows={4}
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-800 outline-none transition-all text-sm resize-none"
+            />
+          </div>
+
+          <button 
+            type="submit"
+            className="md:col-span-2 mt-4 bg-green-800 text-white rounded-2xl py-4.5 font-bold uppercase tracking-widest text-xs hover:bg-green-900 shadow-lg shadow-green-100 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+          >
+            Initialize Group Room
+          </button>
+        </form>
+      </motion.div>
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { useAuth } from "../hooks/useAuth";
 
 const DashboardHome = () => {
   const { profile } = useAuth();
-
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">

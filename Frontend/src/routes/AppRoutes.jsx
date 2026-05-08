@@ -25,7 +25,6 @@ const AppRoutes = () => (
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<FarmerDashboard />} />
-        <Route path="home" element={<DashboardHome />} />
         <Route path="farmer" element={<FarmerDashboard />} />
         <Route path="leader" element={<LeaderDashboard />} />
       </Route>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Activity, Users } from "lucide-react";
+import { Activity, Users, Plus } from "lucide-react";
 import SectionCard from "../components/ui/SectionCard";
 import StatCard from "../components/ui/StatCard";
 import RolePill from "../components/shared/RolePill";
@@ -56,6 +56,22 @@ const FarmerDashboard = () => {
 
   return (
     <div className="space-y-5">
+        <div className="flex justify-end gap-3">
+          <Link
+            to="/create-group"
+            className="bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-900 flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Create Group
+          </Link>
+
+          <Link
+            to="/join-group"
+            className="border border-gray-300 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100"
+          >
+            Join Group
+          </Link>
+        </div>
       <div className="grid md:grid-cols-4 gap-4">
         <StatCard title="My Groups" value={data.currentGroups?.length || 0} icon={Users} />
         <StatCard title="Land Contributed" value={`${totalContribution} acres`} icon={Activity} />
