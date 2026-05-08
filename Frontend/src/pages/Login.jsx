@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Phone, Lock, Eye, EyeOff, Users } from 'lucide-react';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Lock, Mail, Users } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    identifier: '',
-    phone: '',
-    password: ''
-    });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const { login, loginGoogle } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await login(formData);
+      navigate("/dashboard");
+    } catch {
+      setError("Unable to login. Please check credentials.");
+    }
+  };
+
+  const onGoogle = async () => {
+    setError("");
+    try {
+      await loginGoogle();
+      navigate("/dashboard");
+    } catch {
+      setError("Google login failed.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-6 lg:px-8">
@@ -22,7 +43,7 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-10 shadow-xl shadow-gray-200/50 rounded-3xl border border-gray-100">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={onSubmit}>
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1"> Email</label>
               <div className="relative">
@@ -30,34 +51,13 @@ const Login = () => {
                   <Mail size={18} />
                 </div>
                 <input
-                  type="text"
-                  placeholder="Enter your details"
+                  type="email"
+                  placeholder="Enter your email"
                   className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-800 focus:border-transparent outline-none transition-all"
-                  onChange={(e) => setFormData({...formData, identifier: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
-
-            <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
-                    Phone Number
-                </label>
-
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                    <Phone size={18} />
-                    </div>
-
-                    <input
-                    type="tel"
-                    placeholder="Enter phone number"
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-800 focus:border-transparent outline-none transition-all"
-                    onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                    }
-                    />
-                </div>
-                </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">Password</label>
@@ -69,7 +69,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="w-full pl-11 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-800 focus:border-transparent outline-none transition-all"
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button 
                   type="button"
@@ -81,16 +81,17 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded text-green-800 focus:ring-green-800 h-4 w-4" />
-                <span className="text-gray-500 font-medium">Remember me</span>
-              </label>
-              <a href="#" className="font-bold text-green-800 hover:underline">Forgot Password?</a>
-            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
 
             <button className="w-full bg-green-800 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-green-900 shadow-lg shadow-green-100 transition-all">
               Login Account
+            </button>
+            <button
+              type="button"
+              onClick={onGoogle}
+              className="w-full border border-gray-300 py-3 rounded-2xl font-semibold text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Continue with Google
             </button>
 
             <p className="text-center text-sm text-gray-500 pt-4">

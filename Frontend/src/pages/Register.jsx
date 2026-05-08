@@ -1,51 +1,42 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  User,
-  ShoppingBag,
-  Phone,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  MapPin,
-  Sprout,
-  Briefcase,
-  Globe,
-  ChevronRight,
-  Users,
-  Layers,
-  CreditCard,
-  Navigation
-} from 'lucide-react';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronRight, Eye, EyeOff, Layers, Lock, Mail, MapPin, Phone, Sprout, User, Users } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 const Register = () => {
-  const [role, setRole] = useState('farmer'); // Removed leader rollcard per request[cite: 3]
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-  name: '',
+  fullName: '',
   phone: '',
   email: '',
   password: '',
   confirmPassword: '',
-
-  // Farmer Fields
-  stateDistrict: '',
-  fullLocation: '',
-  aadhaar: '',
-  gpsLocation: '',
+  state: '',
+  district: '',
   village: '',
   landSize: '',
-  cropType: '',
-
-  // Buyer Fields
-  businessName: '',
-  buyerType: ''
+  cropInterest: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Password and confirm password must match.");
+      return;
+    }
+    try {
+      await register(formData);
+      navigate("/dashboard");
+    } catch {
+      setError("Registration failed. Check firebase config and try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-6 lg:px-8">
@@ -54,34 +45,20 @@ const Register = () => {
           <Users className="text-white" size={24} />
         </div>
         <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Join the Collective</h2>
-        <p className="mt-2 text-sm text-gray-500">Select your role to get started with AgriSangh[cite: 3]</p>
+        <p className="mt-2 text-sm text-gray-500">Register as a farmer and join collective farming groups</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-10 shadow-xl shadow-gray-200/50 rounded-3xl border border-gray-100">
-          {/* Role Selection[cite: 1, 3] */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <button
-              onClick={() => setRole('farmer')}
-              className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all ${role === 'farmer' ? 'border-green-800 bg-green-50 text-green-800' : 'border-gray-100 bg-white text-gray-400'}`}
-            >
-              <User size={24} className="mb-2" />
-              <span className="text-xs font-bold uppercase">Farmer</span>
-            </button>
-            <button
-              onClick={() => setRole('buyer')}
-              className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all ${role === 'buyer' ? 'border-green-800 bg-green-50 text-green-800' : 'border-gray-100 bg-white text-gray-400'}`}
-            >
-              <ShoppingBag size={24} className="mb-2" />
-              <span className="text-xs font-bold uppercase">Buyer</span>
-            </button>
+          <div className="bg-green-50 text-green-900 border border-green-100 rounded-xl p-3 text-sm mb-6">
+            New users are registered as farmers. A farmer becomes leader after creating a group.
           </div>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-4 mb-6">
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input name="name" placeholder="Full Name" className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-800" onChange={handleInputChange} />
+                <input name="fullName" placeholder="Full Name" className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-800" onChange={handleInputChange} />
               </div>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -100,73 +77,17 @@ const Register = () => {
                 </div>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={role}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-4 border-l-2 border-green-800/20 pl-4 py-2"
-              >
-                {role === 'farmer' ? (
-                  <>
-                    <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} /><input name="village" placeholder="Village Name" className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative"><Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="landSize" placeholder="Acres" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
-                      <div className="relative"><Sprout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="cropType" placeholder="Crop" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
-                    </div>
-                    <div className="relative">
-                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        
-                        <input
-                            name="stateDistrict"
-                            placeholder="State / District"
-                            className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                            onChange={handleInputChange}
-                        />
-                        </div>
-
-                        <div className="relative">
-                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        
-                        <input
-                            name="fullLocation"
-                            placeholder="Full Location"
-                            className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                            onChange={handleInputChange}
-                        />
-                        </div>
-
-                        <div className="relative">
-                        <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        
-                        <input
-                            name="aadhaar"
-                            placeholder="Aadhaar Number"
-                            className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                            onChange={handleInputChange}
-                        />
-                        </div>
-
-                        <div className="relative">
-                        <Navigation className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        
-                        <input
-                            name="gpsLocation"
-                            placeholder="GPS Location"
-                            className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                            onChange={handleInputChange}
-                        />
-                        </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="relative"><Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} /><input name="businessName" placeholder="Business Name" className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
-                    <div className="relative"><Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} /><input name="buyerType" placeholder="Buyer Type (e.g. Retail)" className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <div className="space-y-4 border-l-2 border-green-800/20 pl-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="state" placeholder="State" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
+                <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="district" placeholder="District" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
+              </div>
+              <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} /><input name="village" placeholder="Village Name" className="w-full pl-11 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative"><Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="landSize" placeholder="Land Size (acres)" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
+                <div className="relative"><Sprout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input name="cropInterest" placeholder="Crop Interest" className="w-full pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={handleInputChange} /></div>
+              </div>
+            </div>
 
             <div className="space-y-4">
 
@@ -214,6 +135,7 @@ const Register = () => {
 
                 </div>
 
+            {error && <p className="text-sm text-red-600">{error}</p>}
             <button className="w-full bg-green-800 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-green-900 shadow-lg shadow-green-100 flex items-center justify-center gap-2 transition-all">
               Complete Registration <ChevronRight size={18} />
             </button>

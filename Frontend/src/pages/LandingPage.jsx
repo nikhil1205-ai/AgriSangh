@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Menu, 
   X, 
-  ChevronRight, 
   Users, 
   ShieldCheck, 
   Database, 
@@ -12,7 +11,7 @@ import {
   CheckCircle2,
   ArrowRight
 } from 'lucide-react';
-
+import { Link } from "react-router-dom";
 /**
  * AGRISANGH: Verified Collective Farming Platform
  * UI/UX: Modern Indian Government-Tech Style
@@ -20,7 +19,6 @@ import {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
   const navLinks = [
     { name: 'Home', href: '#' },
     { name: 'Problem', href: '#problem' },
@@ -53,12 +51,12 @@ const Navbar = () => {
             </div>
           </div>
           <div className="hidden md:flex items-center">
-            <button className="px-5 mx-3 py-2 rounded-md text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+            <Link className="px-5 mx-3 py-2 rounded-md text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" to="/login">
               Login
-            </button>
-            <button className="bg-green-800 text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-green-900 transition-colors">
+            </Link>
+            <Link className="bg-green-800 text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-green-900 transition-colors" to="/register">
               Get Started
-            </button>
+            </Link>
           </div>
           <div className="flex items-center md:hidden">
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600">
@@ -81,9 +79,13 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
-            <button className="w-full text-left px-3 py-2 text-base font-medium text-green-800">
+            <Link
+              to="/register"
+              onClick={() => setIsOpen(false)}
+              className="block w-full text-left px-3 py-2 text-base font-medium text-green-800 hover:bg-gray-50"
+            >
               Get Started
-            </button>
+            </Link>
           </div>
         </div>
       )}
