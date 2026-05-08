@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { firestore } = require("../config/firebaseAdmin");
-const store = require("../models/inMemoryStore");
+const { upsertUser } = require("../models/userModel");
 const { success, error } = require("../utils/apiResponse");
 
 const JWT_SECRET = process.env.JWT_SECRET || "agrisangh-dev-secret";
@@ -26,7 +26,7 @@ const upsertProfile = async (req, res) => {
       return error(res, "uid, email and fullName are required", 400);
     }
 
-    const user = {
+    const userPayload = {
       uid: payload.uid,
       fullName: payload.fullName,
       email: payload.email,
@@ -38,18 +38,14 @@ const upsertProfile = async (req, res) => {
       cropInterest: payload.cropInterest || "",
       role: payload.role || "farmer",
       groupId: payload.groupId || null,
+      groupHistory: payload.groupHistory || [],
+      contributionHistory: payload.contributionHistory || [],
       updatedAt: new Date().toISOString(),
     };
+    const user = upsertUser(userPayload);
 
     if (firestore) {
       await usersCollection().doc(user.uid).set(user, { merge: true });
-    } else {
-      const existingIndex = store.users.findIndex((u) => u.uid === user.uid);
-      if (existingIndex >= 0) {
-        store.users[existingIndex] = { ...store.users[existingIndex], ...user };
-      } else {
-        store.users.push(user);
-      }
     }
 
     return success(res, { user, token: issueJwt(user) }, "Profile saved", 201);

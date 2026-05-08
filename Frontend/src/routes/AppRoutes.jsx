@@ -9,6 +9,11 @@ import FarmerDashboard from "../pages/FarmerDashboard";
 import LeaderDashboard from "../pages/LeaderDashboard";
 import BuyerVerification from "../pages/BuyerVerification";
 import Profile from "../pages/Profile";
+import CreateGroup from "../pages/CreateGroup";
+import JoinGroup from "../pages/JoinGroup";
+import GroupRoom from "../pages/GroupRoom";
+import LeaderRoom from "../pages/LeaderRoom";
+import RoleRoute from "./RoleRoute";
 
 const AppRoutes = () => (
   <Routes>
@@ -19,9 +24,16 @@ const AppRoutes = () => (
 
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<DashboardHome />} />
+        <Route index element={<FarmerDashboard />} />
+        <Route path="home" element={<DashboardHome />} />
         <Route path="farmer" element={<FarmerDashboard />} />
         <Route path="leader" element={<LeaderDashboard />} />
+      </Route>
+      <Route path="/create-group" element={<CreateGroup />} />
+      <Route path="/join-group" element={<JoinGroup />} />
+      <Route path="/group/:id" element={<GroupRoom />} />
+      <Route element={<RoleRoute role="leader" />}>
+        <Route path="/leader/group/:id" element={<LeaderRoom />} />
       </Route>
       <Route path="/profile" element={<Profile />} />
     </Route>

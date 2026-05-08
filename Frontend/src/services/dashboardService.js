@@ -1,8 +1,14 @@
 import api from "./api";
 
 export const fetchGroups = async () => (await api.get("/groups")).data.data;
+export const discoverGroups = async (params) => (await api.get("/groups", { params })).data.data;
+export const getGroupRoom = async (groupId) => (await api.get(`/groups/${groupId}`)).data.data;
 export const createGroup = async (payload) => (await api.post("/groups", payload)).data.data;
 export const joinGroup = async (payload) => (await api.post("/groups/join", payload)).data.data;
+export const updateGroup = async (groupId, payload) =>
+  (await api.patch(`/groups/${groupId}`, payload)).data.data;
+export const removeMember = async (groupId, memberUid) =>
+  (await api.delete(`/groups/${groupId}/members/${memberUid}`)).data.data;
 
 export const updateCropPlan = async (groupId, payload) =>
   (await api.patch(`/groups/${groupId}/crop-plan`, payload)).data.data;
@@ -27,4 +33,4 @@ export const verifyBatch = async (batchId) => (await api.get(`/batches/verify/${
 
 export const getLeaderDashboard = async (groupId) =>
   (await api.get(`/dashboard/leader/${groupId}`)).data.data;
-export const getFarmerDashboard = async () => (await api.get("/dashboard/farmer")).data.data;
+export const getFarmerDashboard = async () => (await api.get("/dashboard")).data.data;

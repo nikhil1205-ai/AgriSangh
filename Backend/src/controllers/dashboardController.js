@@ -1,31 +1,39 @@
 const store = require("../models/inMemoryStore");
 const { success } = require("../utils/apiResponse");
+const { buildGroupAnalytics } = require("../services/groupService");
+const { findUserByUid } = require("../models/userModel");
 
 const leaderDashboard = (req, res) => {
-  const group = store.groups.find((g) => g.id === req.params.groupId);
-  const contributions = store.contributions.filter((c) => c.groupId === req.params.groupId);
-  const batches = store.batches.filter((b) => b.groupId === req.params.groupId);
-  const totalLand = contributions.reduce((sum, c) => sum + c.landContribution, 0);
+  const analytics = buildGroupAnalytics(req.params.groupId);
+  const group = analytics.group;
 
   return success(res, {
     group,
-    totalFarmers: group?.members?.length || 0,
-    totalOperationalLand: totalLand,
+    totalFarmers: group?.memberProfiles?.length || group?.members?.length || 0,
+    totalOperationalLand: analytics.totalOperationalLand,
     activeCrop: group?.cropPlan?.crop || "-",
-    contributionCount: contributions.length,
-    batches,
+    contributionCount: analytics.contributions.length,
+    batches: analytics.batches,
     irrigationPlan: group?.irrigationPlan || {},
     technologyAccess: group?.technologyAccess || [],
+    totalProductionEstimate: analytics.totalProductionEstimate,
+    participationPercent: analytics.participationPercent,
   });
 };
 
 const farmerDashboard = (req, res) => {
+  const profile = findUserByUid(req.user.uid) || req.user;
   const myContributions = store.contributions.filter((c) => c.farmerUid === req.user.uid);
   const myGroups = store.groups.filter((g) => g.members.includes(req.user.uid));
+  const currentGroups = (profile.groupHistory || []).filter((entry) => entry.status !== "left");
+  const previousGroups = (profile.groupHistory || []).filter((entry) => entry.status === "left");
   return success(res, {
-    profile: req.user,
+    profile,
     groups: myGroups,
     contributions: myContributions,
+    currentGroups,
+    previousGroups,
+    contributionHistory: profile.contributionHistory || [],
   });
 };
 

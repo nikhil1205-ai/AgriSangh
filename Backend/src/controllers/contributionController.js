@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const store = require("../models/inMemoryStore");
 const { success, error } = require("../utils/apiResponse");
+const { addContributionHistory } = require("../models/userModel");
 
 const addContribution = (req, res) => {
   try {
@@ -16,6 +17,13 @@ const addContribution = (req, res) => {
       createdAt: new Date().toISOString(),
     };
     store.contributions.push(contribution);
+    addContributionHistory(req.user.uid, {
+      groupId,
+      landContribution: contribution.landContribution,
+      participationPercent: contribution.participationPercent,
+      estimatedProduction: contribution.estimatedProduction,
+      contributedAt: contribution.createdAt,
+    });
     return success(res, contribution, "Contribution added", 201);
   } catch (e) {
     return error(res, e.message);

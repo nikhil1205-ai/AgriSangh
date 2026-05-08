@@ -12,11 +12,14 @@ const DashboardHome = () => {
           Manage your collective farming operations, contributions, and verified batch identity in one place.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link className="px-4 py-2 bg-green-800 text-white rounded-lg" to="/dashboard/farmer">
+          <Link className="px-4 py-2 bg-green-800 text-white rounded-lg" to="/dashboard">
             Farmer Dashboard
           </Link>
-          <Link className="px-4 py-2 border border-gray-300 rounded-lg" to="/dashboard/leader">
-            Leader Dashboard
+          <Link className="px-4 py-2 border border-gray-300 rounded-lg" to="/create-group">
+            Create Group
+          </Link>
+          <Link className="px-4 py-2 border border-gray-300 rounded-lg" to="/join-group">
+            Join Group
           </Link>
           <Link className="px-4 py-2 border border-gray-300 rounded-lg" to="/verify-batch">
             Buyer Verify Page

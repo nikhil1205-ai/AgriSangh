@@ -2,6 +2,22 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronRight, Eye, EyeOff, Layers, Lock, Mail, MapPin, Phone, Sprout, User, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+
+const getFirebaseErrorMessage = (error) => {
+  const code = error?.code || "";
+  if (error?.message === "Network Error") {
+    return "Backend API not reachable. Start backend server on port 5000.";
+  }
+  if (code.includes("auth/email-already-in-use")) return "This email is already registered.";
+  if (code.includes("auth/invalid-email")) return "Invalid email format.";
+  if (code.includes("auth/weak-password")) return "Password must be at least 6 characters.";
+  if (code.includes("auth/operation-not-allowed")) {
+    return "Email/Password sign-up is disabled in Firebase console.";
+  }
+  if (code.includes("auth/network-request-failed")) return "Network issue. Check internet and try again.";
+  return error?.message || "Registration failed. Check firebase config and try again.";
+};
+
 const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -33,8 +49,8 @@ const Register = () => {
     try {
       await register(formData);
       navigate("/dashboard");
-    } catch {
-      setError("Registration failed. Check firebase config and try again.");
+    } catch (error) {
+      setError(getFirebaseErrorMessage(error));
     }
   };
 

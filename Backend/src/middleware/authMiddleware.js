@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const store = require("../models/inMemoryStore");
+const { findUserByUid } = require("../models/userModel");
 const { error } = require("../utils/apiResponse");
 
 const JWT_SECRET = process.env.JWT_SECRET || "agrisangh-dev-secret";
@@ -11,7 +11,7 @@ const protect = (req, res, next) => {
   try {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = store.users.find((u) => u.uid === decoded.uid) || decoded;
+    const user = findUserByUid(decoded.uid) || decoded;
     req.user = user;
     return next();
   } catch (_e) {

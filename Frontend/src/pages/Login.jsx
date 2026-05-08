@@ -3,6 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
+const getFirebaseErrorMessage = (error) => {
+  const code = error?.code || "";
+  if (error?.message === "Network Error") {
+    return "Backend API not reachable. Start backend server on port 5000.";
+  }
+  if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
+  if (code.includes("auth/user-not-found")) return "No account found for this email.";
+  if (code.includes("auth/wrong-password")) return "Invalid email or password.";
+  if (code.includes("auth/invalid-email")) return "Invalid email format.";
+  if (code.includes("auth/network-request-failed")) return "Network issue. Check internet and try again.";
+  return error?.message || "Unable to login.";
+};
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -16,8 +29,8 @@ const Login = () => {
     try {
       await login(formData);
       navigate("/dashboard");
-    } catch {
-      setError("Unable to login. Please check credentials.");
+    } catch (error) {
+      setError(getFirebaseErrorMessage(error));
     }
   };
 
@@ -26,8 +39,8 @@ const Login = () => {
     try {
       await loginGoogle();
       navigate("/dashboard");
-    } catch {
-      setError("Google login failed.");
+    } catch (error) {
+      setError(getFirebaseErrorMessage(error));
     }
   };
 

@@ -1,32 +1,36 @@
 import { useEffect, useState } from "react";
-import { Activity, Droplets, Tractor, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Activity, Users } from "lucide-react";
 import SectionCard from "../components/ui/SectionCard";
 import StatCard from "../components/ui/StatCard";
-import ProgressBar from "../components/ui/ProgressBar";
-import { addContribution, fetchGroups, getFarmerDashboard, joinGroup } from "../services/dashboardService";
+import RolePill from "../components/shared/RolePill";
+import ActionCard from "../components/dashboard/ActionCard";
+import { addContribution, getFarmerDashboard } from "../services/dashboardService";
 
 const FarmerDashboard = () => {
-  const [groupId, setGroupId] = useState("");
-  const [groups, setGroups] = useState([]);
   const [contributionForm, setContributionForm] = useState({
     landContribution: "",
     participationPercent: "",
     estimatedProduction: "",
   });
-  const [data, setData] = useState({ groups: [], contributions: [] });
+  const [data, setData] = useState({
+    profile: null,
+    groups: [],
+    contributions: [],
+    currentGroups: [],
+    previousGroups: [],
+  });
 
   const loadData = async () => {
-    const [allGroups, dashboard] = await Promise.all([fetchGroups(), getFarmerDashboard()]);
-    setGroups(allGroups);
+    const dashboard = await getFarmerDashboard();
     setData(dashboard);
   };
 
   useEffect(() => {
     let active = true;
     const init = async () => {
-      const [allGroups, dashboard] = await Promise.all([fetchGroups(), getFarmerDashboard()]);
+      const dashboard = await getFarmerDashboard();
       if (active) {
-        setGroups(allGroups);
         setData(dashboard);
       }
     };
@@ -40,50 +44,63 @@ const FarmerDashboard = () => {
 
   const submitContribution = async (e) => {
     e.preventDefault();
+    if (!currentGroup?.id) return;
     await addContribution({ groupId: currentGroup?.id, ...contributionForm });
     setContributionForm({ landContribution: "", participationPercent: "", estimatedProduction: "" });
     loadData();
   };
-
-  const requestJoin = async () => {
-    if (!groupId) return;
-    await joinGroup({ groupId });
-    setGroupId("");
-  };
-
-  const totalContribution = data.contributions.reduce((sum, item) => sum + Number(item.landContribution), 0);
-  const estimatedRevenue = totalContribution * 35000;
+  const totalContribution = (data.contributions || []).reduce(
+    (sum, item) => sum + Number(item.landContribution || 0),
+    0
+  );
 
   return (
     <div className="space-y-5">
       <div className="grid md:grid-cols-4 gap-4">
-        <StatCard title="My Groups" value={data.groups.length} icon={Users} />
+        <StatCard title="My Groups" value={data.currentGroups?.length || 0} icon={Users} />
         <StatCard title="Land Contributed" value={`${totalContribution} acres`} icon={Activity} />
-        <StatCard title="Revenue Estimate" value={`Rs ${estimatedRevenue.toLocaleString()}`} icon={Tractor} />
-        <StatCard title="Water Reminder" value={currentGroup?.irrigationPlan?.schedule || "Pending"} icon={Droplets} />
+        <StatCard title="Crop Interest" value={data.profile?.cropInterest || "-"} />
+        <StatCard title="Role Status" value={data.profile?.role || "farmer"} />
+      </div>
+
+      <SectionCard title="Farmer Profile">
+        <div className="grid md:grid-cols-3 gap-3 text-sm">
+          <p><span className="text-gray-500">Name:</span> {data.profile?.fullName || "-"}</p>
+          <p><span className="text-gray-500">Village:</span> {data.profile?.village || "-"}</p>
+          <p><span className="text-gray-500">Land Size:</span> {data.profile?.landSize || 0} acres</p>
+          <p><span className="text-gray-500">Crop Interests:</span> {data.profile?.cropInterest || "-"}</p>
+          <p className="flex items-center gap-2"><span className="text-gray-500">Role:</span> <RolePill role={data.profile?.role || "farmer"} /></p>
+        </div>
+      </SectionCard>
+
+      <div className="grid lg:grid-cols-2 gap-5">
+        <ActionCard
+          title="Create Group"
+          description="Start a new collaborative farming collective and become leader automatically."
+          to="/create-group"
+          cta="Open Group Creation Form"
+        />
+        <ActionCard
+          title="Join Group"
+          description="Discover nearby crop-focused groups and send join request or direct join."
+          to="/join-group"
+          cta="Open Group Discovery"
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <SectionCard title="Join Collective Group">
-          <div className="flex gap-2">
-            <select
-              className="w-full border border-gray-200 rounded-lg px-3 py-2"
-              value={groupId}
-              onChange={(e) => setGroupId(e.target.value)}
-            >
-              <option value="">Select group</option>
-              {groups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.name} - {group.region}
-                </option>
-              ))}
-            </select>
-            <button onClick={requestJoin} className="px-4 py-2 bg-green-800 text-white rounded-lg">
-              Request
-            </button>
+        <SectionCard title="Group History">
+          <div className="space-y-2">
+            {(data.currentGroups || []).map((entry, idx) => (
+              <div key={`${entry.groupId}-${idx}`} className="bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="font-semibold text-gray-900">{entry.groupName}</p>
+                <p className="text-gray-500">Joined: {new Date(entry.joinedAt).toLocaleDateString()}</p>
+                <p className="text-green-800 text-xs uppercase mt-1">{entry.status}</p>
+              </div>
+            ))}
+            {(data.currentGroups || []).length === 0 && <p className="text-sm text-gray-500">No active group history.</p>}
           </div>
         </SectionCard>
-
         <SectionCard title="Add Contribution">
           <form onSubmit={submitContribution} className="grid grid-cols-3 gap-2">
             <input
@@ -106,39 +123,26 @@ const FarmerDashboard = () => {
             />
             <button className="col-span-3 bg-green-800 text-white rounded-lg py-2">Save Contribution</button>
           </form>
+          {currentGroup?.id && (
+            <Link to={`/group/${currentGroup.id}`} className="inline-block mt-3 text-sm text-green-800 font-semibold">
+              Open Group Room
+            </Link>
+          )}
         </SectionCard>
       </div>
 
-      <SectionCard title="Technology Access + Irrigation + Revenue Split">
-        <div className="grid md:grid-cols-3 gap-4 text-sm">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-semibold text-gray-900">Technology Access</p>
-            <ul className="mt-2 space-y-1 text-gray-600">
-              <li>Drone spraying: Available</li>
-              <li>Soil testing: Available</li>
-              <li>Smart irrigation: Scheduled</li>
-              <li>Equipment sharing: Enabled</li>
-            </ul>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-semibold text-gray-900">Participation Progress</p>
-            <div className="mt-2 space-y-2">
-              {data.contributions.map((entry) => (
-                <div key={entry.id}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>{entry.farmerName}</span>
-                    <span>{entry.participationPercent}%</span>
-                  </div>
-                  <ProgressBar value={Number(entry.participationPercent)} />
-                </div>
-              ))}
+      <SectionCard title="Contribution History">
+        <div className="space-y-2 text-sm">
+          {(data.contributionHistory || []).map((entry, idx) => (
+            <div key={`${entry.groupId}-${idx}`} className="bg-gray-50 rounded-lg p-3 flex justify-between">
+              <span>{entry.landContribution} acres</span>
+              <span>{entry.participationPercent}% participation</span>
+              <span>{entry.estimatedProduction} qtl est.</span>
             </div>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-semibold text-gray-900">Revenue Share Logic</p>
-            <p className="text-gray-600 mt-2">Revenue share is proportional to land contribution percentage.</p>
-            <p className="text-gray-800 mt-2 font-semibold">Your est. earning: Rs {estimatedRevenue.toLocaleString()}</p>
-          </div>
+          ))}
+          {(data.contributionHistory || []).length === 0 && (
+            <p className="text-sm text-gray-500">No contribution history yet.</p>
+          )}
         </div>
       </SectionCard>
     </div>
