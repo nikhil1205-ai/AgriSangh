@@ -19,6 +19,7 @@ const groupSchema = new mongoose.Schema(
     cropFocus: { type: String, trim: true, index: true },
     cropSeason: { type: String, trim: true, index: true },
     totalOperationalLand: { type: Number, default: 0 },
+    status: { type: String, enum: ["active", "completed", "archived"], default: "active", index: true },
 
     village: { type: String, trim: true, index: true },
     district: { type: String, trim: true, index: true },

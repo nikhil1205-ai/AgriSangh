@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SectionCard from "../components/ui/SectionCard";
 import IrrigationCard from "../components/irrigation/IrrigationCard";
 import BatchList from "../components/batches/BatchList";
 import AnalyticsGrid from "../components/analytics/AnalyticsGrid";
 import ProgressBar from "../components/ui/ProgressBar";
-import { addContribution, getGroupRoom, getLeaderDashboard } from "../services/dashboardService";
+import { auth } from "../config/firebase";
+import { addContribution, getGroupRoom, getLeaderDashboard, leaveGroup, archiveGroup } from "../services/dashboardService";
 
 const GroupRoom = () => {
   const { id } = useParams();
   const [room, setRoom] = useState({ group: null, contributions: [], batches: [] });
   const [analytics, setAnalytics] = useState({});
   const [contribution, setContribution] = useState({ landContribution: "", participationPercent: "", estimatedProduction: "" });
+  const [actionLoading, setActionLoading] = useState(false);
+  const navigate = useNavigate();
 
   const load = async () => {
     const [roomData, analyticsData] = await Promise.all([getGroupRoom(id), getLeaderDashboard(id)]);
@@ -41,6 +44,34 @@ const GroupRoom = () => {
     load();
   };
 
+  const leaveCurrentGroup = async () => {
+    const ok = window.confirm("Are you sure you want to leave this group? This will end your active membership.");
+    if (!ok) return;
+    setActionLoading(true);
+    try {
+      await leaveGroup(id);
+      navigate("/dashboard");
+    } catch (error) {
+      window.alert(error?.response?.data?.message || error?.message || "Unable to leave group.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const archiveCurrentGroup = async () => {
+    const ok = window.confirm("Archive this group and end the current season for all members?");
+    if (!ok) return;
+    setActionLoading(true);
+    try {
+      await archiveGroup(id);
+      navigate("/dashboard");
+    } catch (error) {
+      window.alert(error?.response?.data?.message || error?.message || "Unable to archive group.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const group = room.group;
 
   return (
@@ -52,6 +83,30 @@ const GroupRoom = () => {
           <p><span className="text-gray-500">Total Land:</span> {group?.totalExpectedLand || 0} acres</p>
           <p><span className="text-gray-500">Active Crop:</span> {group?.cropPlan?.crop || group?.cropFocus}</p>
           <p><span className="text-gray-500">Season:</span> {group?.cropPlan?.season}</p>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          {group?.leader?.uid === auth.currentUser?.uid ? (
+            <button
+              type="button"
+              onClick={archiveCurrentGroup}
+              disabled={actionLoading}
+              className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
+            >
+              Archive Group
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={leaveCurrentGroup}
+              disabled={actionLoading}
+              className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              Leave Group
+            </button>
+          )}
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700">
+            {group?.status || "active"}
+          </span>
         </div>
       </SectionCard>
 

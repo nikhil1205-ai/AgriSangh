@@ -31,7 +31,13 @@ async function farmerDashboard(req, res, next) {
 
     return ok(res, {
       profile: farmer,
-      groups: (farmer.activeGroups || []).map((g) => ({ id: g.groupId, name: g.groupName })),
+      groups: (farmer.activeGroups || []).map((g) => ({
+        id: g.groupId,
+        name: g.groupName,
+        status: g.status,
+        cropSeason: g.cropSeason,
+        cropFocus: g.cropFocus,
+      })),
       contributions: contributionHistory.slice(0, 20),
       currentGroups,
       previousGroups: [],

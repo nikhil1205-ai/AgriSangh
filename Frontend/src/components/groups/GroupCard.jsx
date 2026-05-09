@@ -1,4 +1,4 @@
-const GroupCard = ({ group, onJoin }) => (
+const GroupCard = ({ group, onJoin, disabled = false }) => (
   <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
     <div className="flex items-start justify-between gap-2">
       <div>
@@ -19,9 +19,14 @@ const GroupCard = ({ group, onJoin }) => (
     </div>
     <button
       onClick={() => onJoin(group.id)}
-      className="mt-4 w-full bg-green-800 text-white py-2 rounded-lg text-sm font-semibold"
+      disabled={disabled}
+      className={`mt-4 w-full rounded-lg py-2 text-sm font-semibold transition ${
+        disabled
+          ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+          : "bg-green-800 text-white hover:bg-green-900"
+      }`}
     >
-      Join Group
+      {disabled ? "Cannot join while active in another group" : "Join Group"}
     </button>
   </div>
 );

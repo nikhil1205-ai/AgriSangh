@@ -35,3 +35,7 @@ export const getBatchDetails = async (batchId) => (await api.get(`/batches/${bat
 export const getLeaderDashboard = async (groupId) =>
   (await api.get(`/dashboard/leader/${groupId}`)).data.data;
 export const getFarmerDashboard = async () => (await api.get("/dashboard")).data.data;
+export const leaveGroup = async (groupId) =>
+  (await api.patch(`/groups/${groupId}/leave`)).data.data;
+export const archiveGroup = async (groupId) =>
+  (await api.patch(`/groups/${groupId}/archive`)).data.data;

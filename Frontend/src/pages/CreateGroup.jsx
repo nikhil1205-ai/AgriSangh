@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createGroup } from "../services/dashboardService";
+import { createGroup, getFarmerDashboard } from "../services/dashboardService";
 import { useAuth } from "../hooks/useAuth";
 import { motion } from 'framer-motion';
 import { 
@@ -17,6 +17,7 @@ import {
 const CreateGroup = () => {
   const navigate = useNavigate();
   const { setProfile } = useAuth();
+  const [hasActiveGroup, setHasActiveGroup] = useState(false);
   const [form, setForm] = useState({
     groupName: "",
     state: "",
@@ -33,8 +34,30 @@ const CreateGroup = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  useEffect(() => {
+    let active = true;
+    const loadProfile = async () => {
+      try {
+        const dashboard = await getFarmerDashboard();
+        if (active) {
+          setHasActiveGroup((dashboard.groups || []).length > 0);
+        }
+      } catch (error) {
+        console.warn("Unable to load farmer dashboard", error);
+      }
+    };
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const submit = async (e) => {
     e.preventDefault();
+    if (hasActiveGroup) {
+      window.alert("You already have an active group this season. Leave or archive it before creating a new one.");
+      return;
+    }
     const group = await createGroup(form);
     // Role automatically transitions upon successful verification
     setProfile((prev) => ({ ...prev, role: "leader", groupId: group.id }));
@@ -66,6 +89,11 @@ const CreateGroup = () => {
               Institutional Upgrade: Farmer → Group Leader[cite: 3]
             </p>
           </div>
+          {hasActiveGroup && (
+            <div className="mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900">
+              You already have an active group in the current season. Exit or archive that group before creating another collective.
+            </div>
+          )}
         </div>
 
         <form onSubmit={submit} className="grid md:grid-cols-2 gap-4">
@@ -116,9 +144,14 @@ const CreateGroup = () => {
 
           <button 
             type="submit"
-            className="md:col-span-2 mt-4 bg-green-800 text-white rounded-2xl py-4.5 font-bold uppercase tracking-widest text-xs hover:bg-green-900 shadow-lg shadow-green-100 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+            disabled={hasActiveGroup}
+            className={`md:col-span-2 mt-4 rounded-2xl py-4.5 font-bold uppercase tracking-widest text-xs shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
+              hasActiveGroup
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed shadow-none"
+                : "bg-green-800 text-white hover:bg-green-900 shadow-green-100"
+            }`}
           >
-            Initialize Group Room
+            {hasActiveGroup ? "Cannot create while active in another group" : "Initialize Group Room"}
           </button>
         </form>
       </motion.div>

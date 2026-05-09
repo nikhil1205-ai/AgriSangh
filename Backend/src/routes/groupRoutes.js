@@ -13,6 +13,8 @@ router.post("/join", requireFirebaseAuth, controller.join);
 router.get("/:groupId", controller.details);
 router.patch("/:groupId", requireFirebaseAuth, controller.patchGroup);
 router.patch("/:groupId/crop-plan", requireFirebaseAuth, controller.patchCropPlan);
+router.patch("/:groupId/leave", requireFirebaseAuth, controller.leaveGroup);
+router.patch("/:groupId/archive", requireFirebaseAuth, controller.archiveGroup);
 router.get("/:groupId/requests", requireFirebaseAuth, controller.getRequests);
 router.patch("/:groupId/requests/decision", requireFirebaseAuth, controller.decideRequest);
 router.delete("/:groupId/members/:memberUid", requireFirebaseAuth, controller.deleteMember);

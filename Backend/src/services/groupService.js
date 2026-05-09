@@ -4,9 +4,35 @@ const Contribution = require("../models/contributionModel");
 const Batch = require("../models/batchModel");
 const { AppError } = require("../utils/errors");
 
+function normalizeSeason(season = "") {
+  return String(season || "").trim().toLowerCase();
+}
+
+function getGroupSeason(group) {
+  return normalizeSeason(group.cropSeason || group.cropPlanning?.season || "");
+}
+
+async function hasActiveSeasonConflict(farmer, season) {
+  if (!season) return false;
+  const activeGroupIds = (farmer.activeGroups || []).map((id) => id);
+  if (!activeGroupIds.length) return false;
+  const activeGroups = await Group.find({ _id: { $in: activeGroupIds }, status: "active" });
+  const normalizedSeason = normalizeSeason(season);
+  return activeGroups.some((g) => getGroupSeason(g) === normalizedSeason);
+}
+
 async function createGroup({ auth, payload }) {
   const leader = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
   if (!leader) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
+
+  const groupSeason = payload.cropSeason || payload.cropPlanning?.season;
+  if (await hasActiveSeasonConflict(leader, groupSeason)) {
+    throw new AppError(
+      "You already have an active group in this season.",
+      400,
+      "VALIDATION_ERROR"
+    );
+  }
 
   const groupId = await Group.generateGroupId();
   const group = await Group.create({
@@ -20,6 +46,11 @@ async function createGroup({ auth, payload }) {
     village: payload.village,
     district: payload.district,
     state: payload.state,
+    cropPlanning: {
+      cropType: payload.cropFocus,
+      season: payload.cropSeason,
+      timeline: payload.timeline || "",
+    },
   });
 
   leader.role = "leader";
@@ -37,8 +68,8 @@ async function createGroup({ auth, payload }) {
   return group;
 }
 
-async function listGroups({ search, region, crop, season }) {
-  const query = {};
+async function listGroups({ search, region, crop, season, status }) {
+  const query = { status: status || "active" };
   if (crop) query.cropFocus = new RegExp(String(crop), "i");
   if (season) query.cropSeason = new RegExp(String(season), "i");
   if (region) {
@@ -85,6 +116,19 @@ async function joinGroup({ auth, groupId, directJoin = false }) {
 
   const group = await Group.findOne({ groupId });
   if (!group) throw new AppError("Group not found", 404, "NOT_FOUND");
+
+  if (group.status !== "active") {
+    throw new AppError("Cannot join a non-active group.", 400, "VALIDATION_ERROR");
+  }
+
+  const groupSeason = getGroupSeason(group);
+  if (await hasActiveSeasonConflict(farmer, groupSeason)) {
+    throw new AppError(
+      "You already have an active group in this season.",
+      400,
+      "VALIDATION_ERROR"
+    );
+  }
 
   if (!directJoin) {
     const alreadyRequested = (group.joinRequests || []).some(
@@ -162,6 +206,14 @@ async function decideJoinRequest({ auth, groupId, payload }) {
   if (action === "approved") {
     const targetFarmer = await Farmer.findById(reqEntry.farmer);
     if (targetFarmer) {
+      const groupSeason = getGroupSeason(group);
+      if (await hasActiveSeasonConflict(targetFarmer, groupSeason)) {
+        throw new AppError(
+          "Target farmer already has an active group in this season.",
+          400,
+          "VALIDATION_ERROR"
+        );
+      }
       const already = group.members.some((m) => String(m) === String(targetFarmer._id));
       if (!already) {
         group.members.push(targetFarmer._id);
@@ -205,6 +257,65 @@ async function removeMember({ auth, groupId, memberUid }) {
   await member.save();
 
   return true;
+}
+
+async function leaveGroup({ auth, groupId }) {
+  const farmer = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
+  if (!farmer) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
+
+  const group = await Group.findOne({ groupId });
+  if (!group) throw new AppError("Group not found", 404, "NOT_FOUND");
+  if (String(group.leader) === String(farmer._id)) {
+    throw new AppError(
+      "Leaders cannot leave directly. Please transfer leadership or archive the group.",
+      400,
+      "VALIDATION_ERROR"
+    );
+  }
+
+  group.members = (group.members || []).filter((m) => String(m) !== String(farmer._id));
+  await group.save();
+
+  farmer.activeGroups = (farmer.activeGroups || []).filter((g) => String(g) !== String(group._id));
+  const historyItem = (farmer.groupHistory || []).find(
+    (entry) => String(entry.group) === String(group._id) && entry.status === "active"
+  );
+  if (historyItem) {
+    historyItem.status = "left";
+    historyItem.leftAt = new Date();
+  }
+  await farmer.save();
+
+  return true;
+}
+
+async function archiveGroup({ auth, groupId }) {
+  const leader = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
+  if (!leader) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
+
+  const group = await Group.findOne({ groupId });
+  if (!group) throw new AppError("Group not found", 404, "NOT_FOUND");
+  if (String(group.leader) !== String(leader._id)) {
+    throw new AppError("Leader-only action", 403, "FORBIDDEN");
+  }
+
+  group.status = "archived";
+  await group.save();
+
+  const members = await Farmer.find({ activeGroups: group._id });
+  for (const member of members) {
+    member.activeGroups = (member.activeGroups || []).filter((g) => String(g) !== String(group._id));
+    const historyItem = (member.groupHistory || []).find(
+      (entry) => String(entry.group) === String(group._id) && entry.status === "active"
+    );
+    if (historyItem) {
+      historyItem.status = "archived";
+      historyItem.leftAt = new Date();
+    }
+    await member.save();
+  }
+
+  return group;
 }
 
 async function updateGroup({ auth, groupId, payload }) {
@@ -264,6 +375,8 @@ module.exports = {
   getJoinRequests,
   decideJoinRequest,
   removeMember,
+  leaveGroup,
+  archiveGroup,
   updateGroup,
   updateCropPlan,
 };

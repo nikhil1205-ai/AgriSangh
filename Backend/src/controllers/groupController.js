@@ -7,6 +7,8 @@ const {
   getJoinRequests,
   decideJoinRequest,
   removeMember,
+  leaveGroup: leaveGroupService,
+  archiveGroup: archiveGroupService,
   updateGroup,
   updateCropPlan,
 } = require("../services/groupService");
@@ -19,9 +21,15 @@ function toGroupCard(group) {
     groupName: group.groupName,
     cropFocus: group.cropFocus,
     cropSeason: group.cropSeason,
+    status: group.status,
     totalExpectedLand: group.totalOperationalLand,
     totalOperationalLand: group.totalOperationalLand,
     location: { state: group.state, district: group.district, village: group.village },
+    cropPlan: {
+      season: group.cropSeason || group.cropPlanning?.season,
+      crop: group.cropFocus || group.cropPlanning?.cropType,
+      timeline: group.cropPlanning?.timeline,
+    },
     state: group.state,
     district: group.district,
     village: group.village,
@@ -69,6 +77,7 @@ async function details(req, res, next) {
     return ok(res, {
       group: {
         ...toGroupCard(group),
+        status: group.status,
         leader: group.leader
           ? {
               uid: group.leader.firebaseUid,
@@ -177,6 +186,24 @@ async function deleteMember(req, res, next) {
   }
 }
 
+async function leaveGroup(req, res, next) {
+  try {
+    await leaveGroupService({ auth: req.auth, groupId: req.params.groupId });
+    return ok(res, true, "Left group successfully");
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function archiveGroup(req, res, next) {
+  try {
+    const group = await archiveGroupService({ auth: req.auth, groupId: req.params.groupId });
+    return ok(res, group, "Group archived");
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   create,
   list,
@@ -186,6 +213,8 @@ module.exports = {
   getRequests,
   decideRequest,
   deleteMember,
+  leaveGroup,
+  archiveGroup,
   patchGroup,
   patchCropPlan,
 };

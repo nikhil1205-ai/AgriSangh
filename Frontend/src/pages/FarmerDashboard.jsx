@@ -16,6 +16,7 @@ import {
   Bell,
 } from "lucide-react";
 import RolePill from "../components/shared/RolePill";
+import { auth } from "../config/firebase";
 import { getFarmerDashboard, getGroupRoom } from "../services/dashboardService";
 
 /**
@@ -291,7 +292,7 @@ const FarmerDashboard = () => {
                     </span>
                     <Link
                       to={
-                        profile?.role === "leader"
+                        g?.leader?.uid === auth.currentUser?.uid
                           ? `/leader/group/${activeGroupId}`
                           : `/group/${activeGroupId}`
                       }

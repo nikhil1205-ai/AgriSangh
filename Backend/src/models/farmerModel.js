@@ -25,7 +25,7 @@ const farmerSchema = new mongoose.Schema(
         group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
         groupId: { type: String },
         groupName: { type: String },
-        status: { type: String, enum: ["active", "left"], default: "active" },
+        status: { type: String, enum: ["active", "left", "archived"], default: "active" },
         joinedAt: { type: Date, default: Date.now },
         leftAt: { type: Date },
       },
