@@ -1,38 +1,23 @@
-const { v4: uuidv4 } = require("uuid");
-const store = require("../models/inMemoryStore");
-const { success, error } = require("../utils/apiResponse");
-const { addContributionHistory } = require("../models/userModel");
+const { ok } = require("../utils/apiResponse");
+const { addContribution, getGroupContributions } = require("../services/contributionService");
 
-const addContribution = (req, res) => {
+async function create(req, res, next) {
   try {
-    const { groupId, landContribution, participationPercent, estimatedProduction } = req.body;
-    const contribution = {
-      id: uuidv4(),
-      groupId,
-      farmerUid: req.user.uid,
-      farmerName: req.user.fullName,
-      landContribution: Number(landContribution || 0),
-      participationPercent: Number(participationPercent || 0),
-      estimatedProduction: Number(estimatedProduction || 0),
-      createdAt: new Date().toISOString(),
-    };
-    store.contributions.push(contribution);
-    addContributionHistory(req.user.uid, {
-      groupId,
-      landContribution: contribution.landContribution,
-      participationPercent: contribution.participationPercent,
-      estimatedProduction: contribution.estimatedProduction,
-      contributedAt: contribution.createdAt,
-    });
-    return success(res, contribution, "Contribution added", 201);
-  } catch (e) {
-    return error(res, e.message);
+    const contribution = await addContribution({ auth: req.auth, payload: req.body });
+    return ok(res, contribution, "Contribution saved");
+  } catch (err) {
+    return next(err);
   }
-};
+}
 
-const listContributions = (req, res) => {
-  const contributions = store.contributions.filter((c) => c.groupId === req.params.groupId);
-  return success(res, contributions, "Contributions fetched");
-};
+async function listByGroup(req, res, next) {
+  try {
+    const contributions = await getGroupContributions({ groupId: req.params.groupId });
+    return ok(res, contributions);
+  } catch (err) {
+    return next(err);
+  }
+}
 
-module.exports = { addContribution, listContributions };
+module.exports = { create, listByGroup };
+

@@ -4,6 +4,15 @@ import { ChevronRight, Eye, EyeOff, Layers, Lock, Mail, MapPin, Phone, Sprout, U
 import { useAuth } from "../hooks/useAuth";
 
 const getFirebaseErrorMessage = (error) => {
+  // Backend/Axios errors
+  const backendMessage =
+    error?.response?.data?.error?.message ||
+    error?.response?.data?.message;
+  if (backendMessage) {
+    const status = error?.response?.status;
+    return status ? `Backend error (${status}): ${backendMessage}` : `Backend error: ${backendMessage}`;
+  }
+
   const code = error?.code || "";
   if (error?.message === "Network Error") {
     return "Backend API not reachable. Start backend server on port 5000.";

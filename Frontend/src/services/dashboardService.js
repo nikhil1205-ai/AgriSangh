@@ -28,8 +28,9 @@ export const getContributions = async (groupId) =>
   (await api.get(`/contributions/${groupId}`)).data.data;
 
 export const createBatch = async (payload) => (await api.post("/batches", payload)).data.data;
-export const getBatches = async (groupId) => (await api.get(`/batches/${groupId}`)).data.data;
+export const getBatches = async (groupId) => (await api.get(`/batches/group/${groupId}`)).data.data;
 export const verifyBatch = async (batchId) => (await api.get(`/batches/verify/${batchId}`)).data.data;
+export const getBatchDetails = async (batchId) => (await api.get(`/batches/${batchId}`)).data.data;
 
 export const getLeaderDashboard = async (groupId) =>
   (await api.get(`/dashboard/leader/${groupId}`)).data.data;

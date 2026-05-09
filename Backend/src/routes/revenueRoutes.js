@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const { requireFirebaseAuth } = require("../middleware/firebaseAuth");
-const { saveProfile } = require("../controllers/authController");
+const { calculate } = require("../controllers/revenueController");
 
-router.post("/profile", requireFirebaseAuth, saveProfile);
+router.post("/calculate", requireFirebaseAuth, calculate);
 
 module.exports = router;
 

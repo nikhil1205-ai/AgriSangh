@@ -1,11 +1,17 @@
-const express = require("express");
-const { createBatch, listBatches, verifyBatch } = require("../controllers/batchController");
-const { protect, requireLeader } = require("../middleware/authMiddleware");
+const router = require("express").Router();
+const { requireFirebaseAuth } = require("../middleware/firebaseAuth");
+const controller = require("../controllers/batchController");
 
-const router = express.Router();
+// Public buyer verification
+router.get("/verify/:batchId", controller.verify);
 
-router.post("/", protect, requireLeader, createBatch);
-router.get("/verify/:batchId", verifyBatch);
-router.get("/:groupId", protect, listBatches);
+// Prompt-style
+router.post("/create", requireFirebaseAuth, controller.create);
+
+// Frontend compatibility
+router.post("/", requireFirebaseAuth, controller.create);
+router.get("/group/:groupId", requireFirebaseAuth, controller.listByGroup);
+router.get("/:batchId", controller.getOne);
 
 module.exports = router;
+

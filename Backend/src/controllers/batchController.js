@@ -1,46 +1,48 @@
-const { v4: uuidv4 } = require("uuid");
-const store = require("../models/inMemoryStore");
-const { success, error } = require("../utils/apiResponse");
-const { generateBatchId } = require("../utils/batchId");
+const { ok } = require("../utils/apiResponse");
+const { createBatch, getBatches, getBatchByBatchId } = require("../services/batchService");
 
-const createBatch = (req, res) => {
+async function create(req, res, next) {
   try {
-    const { groupId, cropType, membersInvolved, estimatedProduction, harvestTimeline } = req.body;
-    const group = store.groups.find((g) => g.id === groupId);
-    if (!group) return error(res, "Group not found", 404);
-
-    const existingCount = store.batches.filter((b) => b.groupId === groupId).length;
-    const batchId = generateBatchId(cropType, existingCount + 1);
-
-    const batch = {
-      id: uuidv4(),
-      batchId,
-      groupId,
-      groupName: group.name,
-      cropType,
-      membersInvolved,
-      estimatedProduction: Number(estimatedProduction || 0),
-      harvestTimeline,
-      authenticity: "verified",
-      createdAt: new Date().toISOString(),
-    };
-
-    store.batches.push(batch);
-    return success(res, batch, "Batch created", 201);
-  } catch (e) {
-    return error(res, e.message);
+    const batch = await createBatch({ auth: req.auth, payload: req.body });
+    return ok(res, batch, "Batch created");
+  } catch (err) {
+    return next(err);
   }
-};
+}
 
-const listBatches = (req, res) => {
-  const batches = store.batches.filter((b) => b.groupId === req.params.groupId);
-  return success(res, batches, "Batches fetched");
-};
+async function listByGroup(req, res, next) {
+  try {
+    const batches = await getBatches({ groupId: req.params.groupId });
+    return ok(res, batches);
+  } catch (err) {
+    return next(err);
+  }
+}
 
-const verifyBatch = (req, res) => {
-  const batch = store.batches.find((b) => b.batchId === req.params.batchId);
-  if (!batch) return error(res, "Batch not found", 404);
-  return success(res, batch, "Batch verified");
-};
+async function verify(req, res, next) {
+  try {
+    const batch = await getBatchByBatchId({ batchId: req.params.batchId });
+    return ok(res, {
+      batchId: batch.batchId,
+      cropType: batch.cropType,
+      estimatedProduction: batch.estimatedProduction,
+      groupId: batch.group.groupId,
+      groupName: batch.group.groupName,
+      authenticity: "Verified",
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
 
-module.exports = { createBatch, listBatches, verifyBatch };
+async function getOne(req, res, next) {
+  try {
+    const batch = await getBatchByBatchId({ batchId: req.params.batchId });
+    return ok(res, batch);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { create, listByGroup, verify, getOne };
+

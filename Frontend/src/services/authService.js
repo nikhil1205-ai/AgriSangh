@@ -22,8 +22,9 @@ export const loginWithGoogle = async () => {
   return userCredential.user;
 };
 
+// Sync (create/update) farmer profile in MongoDB via backend.
 export const saveProfile = async (payload) => {
-  const response = await api.post("/auth/profile", payload);
+  const response = await api.post("/farmers/create", payload);
   return response.data.data;
 };
 

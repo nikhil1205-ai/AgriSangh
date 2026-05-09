@@ -1,10 +1,14 @@
-const express = require("express");
-const { addContribution, listContributions } = require("../controllers/contributionController");
-const { protect } = require("../middleware/authMiddleware");
+const router = require("express").Router();
+const { requireFirebaseAuth } = require("../middleware/firebaseAuth");
+const controller = require("../controllers/contributionController");
 
-const router = express.Router();
+// Prompt-style
+router.post("/create", requireFirebaseAuth, controller.create);
+router.get("/group/:groupId", requireFirebaseAuth, controller.listByGroup);
 
-router.post("/", protect, addContribution);
-router.get("/:groupId", protect, listContributions);
+// Frontend compatibility
+router.post("/", requireFirebaseAuth, controller.create);
+router.get("/:groupId", requireFirebaseAuth, controller.listByGroup);
 
 module.exports = router;
+

@@ -1,10 +1,9 @@
-const express = require("express");
-const { leaderDashboard, farmerDashboard } = require("../controllers/dashboardController");
-const { protect, requireLeader } = require("../middleware/authMiddleware");
+const router = require("express").Router();
+const { requireFirebaseAuth } = require("../middleware/firebaseAuth");
+const { farmerDashboard, leaderDashboard } = require("../controllers/dashboardController");
 
-const router = express.Router();
-
-router.get("/leader/:groupId", protect, requireLeader, leaderDashboard);
-router.get("/farmer", protect, farmerDashboard);
+router.get("/", requireFirebaseAuth, farmerDashboard);
+router.get("/leader/:groupId", requireFirebaseAuth, leaderDashboard);
 
 module.exports = router;
+

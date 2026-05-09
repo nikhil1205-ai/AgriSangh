@@ -1,31 +1,21 @@
-const express = require("express");
-const {
-  createGroup,
-  discoverGroups,
-  getGroupById,
-  joinGroup,
-  getJoinRequests,
-  decideJoinRequest,
-  updateCropPlan,
-  updateIrrigation,
-  updateTechnologyAccess,
-  updateGroup,
-  removeMember,
-} = require("../controllers/groupController");
-const { protect, requireLeader } = require("../middleware/authMiddleware");
+const router = require("express").Router();
+const { requireFirebaseAuth } = require("../middleware/firebaseAuth");
+const controller = require("../controllers/groupController");
 
-const router = express.Router();
+// Prompt-style
+router.post("/create", requireFirebaseAuth, controller.create);
+router.get("/search", controller.search);
 
-router.get("/", protect, discoverGroups);
-router.get("/:groupId", protect, getGroupById);
-router.post("/", protect, createGroup);
-router.post("/join", protect, joinGroup);
-router.get("/:groupId/requests", protect, requireLeader, getJoinRequests);
-router.patch("/:groupId/requests/decision", protect, requireLeader, decideJoinRequest);
-router.patch("/:groupId", protect, requireLeader, updateGroup);
-router.delete("/:groupId/members/:memberUid", protect, requireLeader, removeMember);
-router.patch("/:groupId/crop-plan", protect, requireLeader, updateCropPlan);
-router.patch("/:groupId/irrigation", protect, requireLeader, updateIrrigation);
-router.patch("/:groupId/technology", protect, requireLeader, updateTechnologyAccess);
+// Frontend compatibility
+router.get("/", controller.list);
+router.post("/", requireFirebaseAuth, controller.create);
+router.post("/join", requireFirebaseAuth, controller.join);
+router.get("/:groupId", controller.details);
+router.patch("/:groupId", requireFirebaseAuth, controller.patchGroup);
+router.patch("/:groupId/crop-plan", requireFirebaseAuth, controller.patchCropPlan);
+router.get("/:groupId/requests", requireFirebaseAuth, controller.getRequests);
+router.patch("/:groupId/requests/decision", requireFirebaseAuth, controller.decideRequest);
+router.delete("/:groupId/members/:memberUid", requireFirebaseAuth, controller.deleteMember);
 
 module.exports = router;
+

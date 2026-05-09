@@ -26,6 +26,8 @@ const JoinGroup = () => {
   }, [filters]);
 
   const onJoin = async (groupId) => {
+    const ok = window.confirm("Join this group? Your profile will be linked to the collective.");
+    if (!ok) return;
     await joinGroup({ groupId, directJoin: true });
     navigate(`/group/${groupId}`);
   };
