@@ -4,7 +4,6 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
-import DashboardHome from "../pages/DashboardHome";
 import FarmerDashboard from "../pages/FarmerDashboard";
 import LeaderDashboard from "../pages/LeaderDashboard";
 import BuyerVerification from "../pages/BuyerVerification";
@@ -13,6 +12,8 @@ import CreateGroup from "../pages/CreateGroup";
 import JoinGroup from "../pages/JoinGroup";
 import GroupRoom from "../pages/GroupRoom";
 import LeaderRoom from "../pages/LeaderRoom";
+import MyGroups from "../pages/MyGroups";
+import MarketNews from "../pages/MarketNews";
 import RoleRoute from "./RoleRoute";
 
 const AppRoutes = () => (
@@ -23,10 +24,13 @@ const AppRoutes = () => (
     <Route path="/verify-batch" element={<BuyerVerification />} />
 
     <Route element={<ProtectedRoute />}>
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<FarmerDashboard />} />
-        <Route path="farmer" element={<FarmerDashboard />} />
-        <Route path="leader" element={<LeaderDashboard />} />
+      <Route element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<FarmerDashboard />} />
+        <Route path="/dashboard/farmer" element={<FarmerDashboard />} />
+        <Route path="/dashboard/leader" element={<LeaderDashboard />} />
+        <Route path="/mygroup" element={<MyGroups />} />
+        <Route path="/market" element={<MarketNews />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="/create-group" element={<CreateGroup />} />
       <Route path="/join-group" element={<JoinGroup />} />
@@ -34,7 +38,6 @@ const AppRoutes = () => (
       <Route element={<RoleRoute role="leader" />}>
         <Route path="/leader/group/:id" element={<LeaderRoom />} />
       </Route>
-      <Route path="/profile" element={<Profile />} />
     </Route>
   </Routes>
 );

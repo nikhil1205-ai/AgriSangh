@@ -1,0 +1,79 @@
+{
+  "news": [
+    {
+      "id": "news-01",
+      "category": "Price alert",
+      "title": "Wheat prices rising across North India",
+      "description": "Regional wholesale rates have climbed 12% as demand for fortified grain increases ahead of the harvest window.",
+      "region": "North India",
+      "impacts": "Supply tightness",
+      "badge": "High",
+      "badgeClass": "bg-emerald-100 text-emerald-900"
+    },
+    {
+      "id": "news-02",
+      "category": "Weather",
+      "title": "Rain alerts for Eastern collectives",
+      "description": "Monsoon pockets are likely to bring targeted showers, useful for irrigation planning and soil moisture recovery.",
+      "region": "East India",
+      "impacts": "Irrigation relief",
+      "badge": "Active",
+      "badgeClass": "bg-amber-100 text-amber-900"
+    },
+    {
+      "id": "news-03",
+      "category": "Demand",
+      "title": "Pulse demand trending upward among food brands",
+      "description": "Procurement teams are signaling stronger orders for chickpeas and lentils in the coming weeks.",
+      "region": "Pan India",
+      "impacts": "Premium market",
+      "badge": "Watch",
+      "badgeClass": "bg-slate-100 text-slate-900"
+    }
+  ],
+  "trends": [
+    {
+      "id": "trend-01",
+      "crop": "Wheat",
+      "title": "Price momentum continues",
+      "movement": "+9%",
+      "movementClass": "bg-emerald-100 text-emerald-900",
+      "price": "₹26.8/kg",
+      "demand": "High",
+      "insight": "Stable demand from eastern grain markets keeps the price outlook bullish."
+    },
+    {
+      "id": "trend-02",
+      "crop": "Millet",
+      "title": "Premium sourcing window",
+      "movement": "+14%",
+      "movementClass": "bg-emerald-100 text-emerald-900",
+      "price": "₹19.2/kg",
+      "demand": "Rising",
+      "insight": "Shift toward healthy foods is increasing farmer visibility and pricing power."
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alert-01",
+      "title": "Localized rain warning",
+      "description": "Heavy showers possible near Barabanki and surrounding districts late this week.",
+      "level": "Monitor",
+      "variant": "bg-amber-50 border-amber-200 text-amber-900"
+    },
+    {
+      "id": "alert-02",
+      "title": "Heatwave advisory",
+      "description": "Dry days expected next week; extra irrigation may be needed for newly planted plots.",
+      "level": "Action",
+      "variant": "bg-red-50 border-red-200 text-red-900"
+    },
+    {
+      "id": "alert-03",
+      "title": "Soil moisture stable",
+      "description": "Water tracking sensors indicate healthy levels for the current millet fields.",
+      "level": "Info",
+      "variant": "bg-emerald-50 border-emerald-200 text-emerald-900"
+    }
+  ]
+}

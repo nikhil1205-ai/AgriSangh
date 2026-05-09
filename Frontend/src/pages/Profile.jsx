@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { User, Sprout, History, BadgeCheck, Bell, Settings } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import RolePill from "../components/shared/RolePill";
 import { getFarmerDashboard } from "../services/dashboardService";
 
 const Profile = () => {
-  const { profile: ctxProfile } = useAuth();
+  const navigate = useNavigate();
+  const { profile: ctxProfile, signout } = useAuth();
   const [dash, setDash] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -217,6 +219,19 @@ const Profile = () => {
           </span>
         </div>
       </section>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={async () => {
+            await signout();
+            navigate("/login");
+          }}
+          className="mt-6 inline-flex items-center justify-center rounded-3xl bg-red-600 px-6 py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 };

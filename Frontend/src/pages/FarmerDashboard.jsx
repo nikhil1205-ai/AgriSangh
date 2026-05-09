@@ -157,7 +157,13 @@ const FarmerDashboard = () => {
 
   return (
     <div className="space-y-8">
-
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 px-2">
+          <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  My Dashboard
+              </h2>
+          </div>
+      </div>                
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">

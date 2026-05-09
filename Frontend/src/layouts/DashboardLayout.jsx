@@ -37,7 +37,7 @@ const DashboardLayout = () => {
 
   const navItems = [
     { name: "Home", path: "/dashboard", icon: LayoutDashboard },
-    { name: "My Groups", path: "/collective", icon: Users },
+    { name: "My Groups", path: "/mygroup", icon: Users },
     { name: "Market News", path: "/market", icon: Database },
   ];
 
@@ -121,17 +121,7 @@ const DashboardLayout = () => {
           transition={{ duration: 0.5 }}
           className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-[32px] p-6 shadow-2xl shadow-green-900/5 min-h-[calc(100vh-180px)]"
         >
-          {/* Dashboard Context Header - Hidden on subpages if desired */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 px-2">
-            <div>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                Collective Workspace
-              </h2>
-              <p className="text-sm text-slate-500 font-medium">
-                Operational infrastructure for your farming unit.
-              </p>
-            </div>
-          </div>
+
 
           <Outlet />
         </motion.div>

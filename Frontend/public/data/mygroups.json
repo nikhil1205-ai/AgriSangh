@@ -1,0 +1,57 @@
+{
+  "activeGroup": {
+    "id": "group-01",
+    "name": "Bhoomi Harvest Collective",
+    "description": "A high-performing cooperative driving sustainable millet and pulse production in the heartland.",
+    "crop": "Millet & Pulses",
+    "season": "Rabi 2026",
+    "leader": "Ananya Singh",
+    "members": 18,
+    "landArea": "42 acres",
+    "contribution": "68%",
+    "batchStatus": "Ready for Dispatch",
+    "location": {
+      "name": "Barabanki, Uttar Pradesh",
+      "lat": 26.9200,
+      "lng": 81.1900,
+      "members": [
+        { "id": "m1", "name": "Sunita", "lat": 26.9250, "lng": 81.1950 },
+        { "id": "m2", "name": "Rajesh", "lat": 26.9180, "lng": 81.1850 },
+        { "id": "m3", "name": "Mira", "lat": 26.9150, "lng": 81.1980 }
+      ]
+    },
+    "irrigation": "Drip irrigation active",
+    "progress": "79% crop cycle complete",
+    "verification": "Verified batch ID",
+    "membersPreview": [
+      { "id": "p1", "name": "Sunita K.", "role": "Coordinator", "contribution": "28%", "avatar": "SK" },
+      { "id": "p2", "name": "Rajesh P.", "role": "Harvest lead", "contribution": "23%", "avatar": "RP" },
+      { "id": "p3", "name": "Mira S.", "role": "Soil care", "contribution": "17%", "avatar": "MS" },
+      { "id": "p4", "name": "Anuj T.", "role": "Logistics", "contribution": "12%", "avatar": "AT" }
+    ]
+  },
+  "pastGroups": [
+    {
+      "id": "past-01",
+      "name": "Kisan Pulse Alliance",
+      "season": "Kharif 2025",
+      "summary": "Delivered a verified pulse harvest with a strong quality premium and collaborative processing routines.",
+      "crop": "Pulses",
+      "yield": "21.4 t",
+      "members": 14,
+      "landArea": "36 acres",
+      "verification": "Batch certified"
+    },
+    {
+      "id": "past-02",
+      "name": "Raita Grain Circle",
+      "season": "Rabi 2025",
+      "summary": "Executed a coordinated rabi season with shared irrigation and harvest logistics for premium grain pricing.",
+      "crop": "Wheat",
+      "yield": "34.2 t",
+      "members": 16,
+      "landArea": "38 acres",
+      "verification": "Batch certified"
+    }
+  ]
+}
