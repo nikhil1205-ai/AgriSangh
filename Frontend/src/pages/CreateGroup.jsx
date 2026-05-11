@@ -64,7 +64,7 @@ const CreateGroup = () => {
       const current = prev || profile || {};
       return { ...current, role: "leader", groupId: group.id };
     });
-    navigate(`/leader/group/${group.id}`);
+    navigate(`/group/${group.id}`);
   };
 
   return (

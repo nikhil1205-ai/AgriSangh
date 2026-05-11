@@ -291,11 +291,7 @@ const FarmerDashboard = () => {
                       Participating
                     </span>
                     <Link
-                      to={
-                        g?.leader?.uid === auth.currentUser?.uid
-                          ? `/leader/group/${activeGroupId}`
-                          : `/group/${activeGroupId}`
-                      }
+                      to={`/group/${activeGroupId}`}
                       className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-green-800 hover:underline"
                     >
                       Enter group room <ChevronRight size={16} />

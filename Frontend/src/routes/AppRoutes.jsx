@@ -11,10 +11,8 @@ import Profile from "../pages/Profile";
 import CreateGroup from "../pages/CreateGroup";
 import JoinGroup from "../pages/JoinGroup";
 import GroupRoom from "../pages/GroupRoom";
-import LeaderRoom from "../pages/LeaderRoom";
 import MyGroups from "../pages/MyGroups";
 import MarketNews from "../pages/MarketNews";
-import RoleRoute from "./RoleRoute";
 
 const AppRoutes = () => (
   <Routes>
@@ -35,9 +33,6 @@ const AppRoutes = () => (
         <Route path="/join-group" element={<JoinGroup />} />
       </Route>
       <Route path="/group/:id" element={<GroupRoom />} />
-      <Route element={<RoleRoute role="leader" />}>
-        <Route path="/leader/group/:id" element={<LeaderRoom />} />
-      </Route>
     </Route>
   </Routes>
 );

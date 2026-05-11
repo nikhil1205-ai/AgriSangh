@@ -169,7 +169,7 @@ const ActiveGroupCard = ({ group, isLeader }) => {
 
       <div className="grid gap-4 sm:grid-cols-3 my-8">
         <Link
-          to={isLeader ? `/leader/group/${group.id}` : `/group/${group.id}`}
+          to={`/group/${group.id}`}
           className="inline-flex items-center justify-center rounded-3xl bg-emerald-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
         >
           <ArrowRight size={18} className="mr-2" /> Enter Group Room
