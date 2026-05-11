@@ -16,7 +16,7 @@ import {
 
 const CreateGroup = () => {
   const navigate = useNavigate();
-  const { setProfile } = useAuth();
+  const { profile, setProfile } = useAuth();
   const [hasActiveGroup, setHasActiveGroup] = useState(false);
   const [form, setForm] = useState({
     groupName: "",
@@ -59,8 +59,11 @@ const CreateGroup = () => {
       return;
     }
     const group = await createGroup(form);
-    // Role automatically transitions upon successful verification
-    setProfile((prev) => ({ ...prev, role: "leader", groupId: group.id }));
+    // Role automatically transitions upon successful verification; preserve existing profile fields.
+    setProfile((prev) => {
+      const current = prev || profile || {};
+      return { ...current, role: "leader", groupId: group.id };
+    });
     navigate(`/leader/group/${group.id}`);
   };
 

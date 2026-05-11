@@ -3,6 +3,7 @@ import { BarChart3, Leaf, MapPin, Sparkles, ShieldCheck, Users, Zap } from "luci
 import axios from "axios";
 import ActiveGroupCard from "../components/groups/ActiveGroupCard";
 import PastGroupCard from "../components/groups/PastGroupCard";
+import { auth } from "../config/firebase";
 import { getFarmerDashboard, getGroupRoom } from "../services/dashboardService";
 
 const MyGroups = () => {
@@ -40,6 +41,8 @@ const MyGroups = () => {
   }, []);
 
   const activeGroupId = data.groups?.[0]?.id ?? null;
+
+  const isLeader = activeRoom?.group?.leader?.uid === auth.currentUser?.uid;
 
   useEffect(() => {
     if (!activeGroupId) {
@@ -139,6 +142,7 @@ const MyGroups = () => {
       season: currentSeason,
       leader: leaderName,
       members: g?.members?.length || 0,
+      membersList: g?.members || [],
       landArea: `${totalContributionLand} acres`,
       contribution: myContributionPct ? `${myContributionPct}%` : "0%",
       batchStatus: currentBatch ? "Ready for Dispatch" : "In Progress",
@@ -210,7 +214,7 @@ const MyGroups = () => {
       ) : (
         <div className="space-y-8">
           {activeGroup && (
-            <ActiveGroupCard group={activeGroup} role={profile?.role} />
+            <ActiveGroupCard group={activeGroup} isLeader={isLeader} />
           )}
 
           <section className="space-y-5">

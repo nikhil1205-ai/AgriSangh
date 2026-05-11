@@ -2,6 +2,7 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { loginWithEmail, loginWithGoogle, logout, registerWithEmail, saveProfile } from "../services/authService";
+import { getFarmerDashboard } from "../services/dashboardService";
 
 const AuthContext = createContext(null);
 
@@ -21,6 +22,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
+      if (user) {
+        try {
+          const dashboard = await getFarmerDashboard();
+          setProfile(dashboard.profile);
+        } catch (err) {
+          console.warn("Unable to restore user profile", err);
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -46,12 +58,13 @@ export const AuthProvider = ({ children }) => {
     const user = await loginWithEmail({ email, password });
     await user.getIdToken(true);
 
-    const saved = await saveProfile({
+    const loginPayload = {
       uid: user.uid,
       email: user.email,
-      fullName: user.displayName || "Agri Farmer",
-      role: "farmer",
-    });
+    };
+    if (user.displayName) loginPayload.fullName = user.displayName;
+
+    const saved = await saveProfile(loginPayload);
 
     setProfile(saved);
     return saved;
@@ -61,12 +74,13 @@ export const AuthProvider = ({ children }) => {
     const user = await loginWithGoogle();
     await user.getIdToken(true);
 
-    const saved = await saveProfile({
+    const googlePayload = {
       uid: user.uid,
       email: user.email,
-      fullName: user.displayName || "Agri Farmer",
-      role: "farmer",
-    });
+    };
+    if (user.displayName) googlePayload.fullName = user.displayName;
+
+    const saved = await saveProfile(googlePayload);
 
     setProfile(saved);
     return saved;

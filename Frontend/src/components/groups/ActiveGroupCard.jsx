@@ -3,7 +3,7 @@ import { ArrowRight, BarChart3, Layers, MapPin, ShieldCheck, Sparkles, Users, Dr
 import GroupMap from "./GroupMap";
 import MemberPreview from "./MemberPreview";
 
-const ActiveGroupCard = ({ group, role }) => {
+const ActiveGroupCard = ({ group, isLeader }) => {
   return (
     <section className="rounded-[32px] border border-slate-200/80 bg-white/85 p-6 shadow-2xl shadow-green-900/10 backdrop-blur-xl">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -97,22 +97,79 @@ const ActiveGroupCard = ({ group, role }) => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-xl font-semibold text-slate-900">Member contribution preview</h3>
-            <p className="mt-2 text-sm text-slate-600">Quick access to your top contributors and operational collaborators.</p>
+            <p className="mt-2 text-sm text-slate-600">Quick access to contributor details, roles, and land participation.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-3xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm">
             <Users size={18} /> {group.members} members
           </div>
         </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {group.membersPreview.map((member) => (
-            <MemberPreview key={member.id} member={member} />
-          ))}
-        </div>
+        {group.membersPreview?.length > 0 ? (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {group.membersPreview.map((member) => (
+              <div key={member.id} className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900 font-bold shadow-sm">
+                      {member.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{member.name}</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{member.role}</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">
+                    {member.contribution}
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-2 text-sm text-slate-600">
+                  <div className="rounded-2xl bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Farmer</p>
+                    <p className="font-semibold text-slate-900">{member.name}</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Contribution</p>
+                    <p className="font-semibold text-slate-900">{member.contribution}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : group.membersList?.length > 0 ? (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {group.membersList.map((member) => (
+              <div key={member.id || member.uid} className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900 font-bold shadow-sm">
+                    {member.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{member.name || 'Unknown'}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{member.role || 'Member'}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 text-sm text-slate-600">
+                  <div className="rounded-2xl bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Member</p>
+                    <p className="font-semibold text-slate-900">{member.name || 'Unknown'}</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Role</p>
+                    <p className="font-semibold text-slate-900">{member.role || 'Member'}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+            No member details are available yet.
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3 my-8">
         <Link
-          to={role === "leader" ? `/leader/group/${group.id}` : `/group/${group.id}`}
+          to={isLeader ? `/leader/group/${group.id}` : `/group/${group.id}`}
           className="inline-flex items-center justify-center rounded-3xl bg-emerald-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
         >
           <ArrowRight size={18} className="mr-2" /> Enter Group Room

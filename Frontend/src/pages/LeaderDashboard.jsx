@@ -51,8 +51,8 @@ const LeaderDashboard = () => {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
-    becomeLeader();
     const created = await createGroup(groupForm);
+    becomeLeader();
     setGroupId(created.id);
     setGroupForm({ name: "", region: "", cropFocus: "" });
   };

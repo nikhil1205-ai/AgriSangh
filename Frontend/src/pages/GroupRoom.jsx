@@ -17,7 +17,15 @@ const GroupRoom = () => {
   const navigate = useNavigate();
 
   const load = async () => {
-    const [roomData, analyticsData] = await Promise.all([getGroupRoom(id), getLeaderDashboard(id)]);
+    const roomData = await getGroupRoom(id);
+    let analyticsData = {};
+    if (roomData.group?.leader?.uid === auth.currentUser?.uid) {
+      try {
+        analyticsData = await getLeaderDashboard(id);
+      } catch (error) {
+        analyticsData = {};
+      }
+    }
     setRoom(roomData);
     setAnalytics(analyticsData);
   };
@@ -25,7 +33,15 @@ const GroupRoom = () => {
   useEffect(() => {
     let active = true;
     const init = async () => {
-      const [roomData, analyticsData] = await Promise.all([getGroupRoom(id), getLeaderDashboard(id)]);
+      const roomData = await getGroupRoom(id);
+      let analyticsData = {};
+      if (roomData.group?.leader?.uid === auth.currentUser?.uid) {
+        try {
+          analyticsData = await getLeaderDashboard(id);
+        } catch (error) {
+          analyticsData = {};
+        }
+      }
       if (active) {
         setRoom(roomData);
         setAnalytics(analyticsData);
