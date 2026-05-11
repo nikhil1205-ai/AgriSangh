@@ -39,3 +39,6 @@ export const leaveGroup = async (groupId) =>
   (await api.patch(`/groups/${groupId}/leave`)).data.data;
 export const archiveGroup = async (groupId) =>
   (await api.patch(`/groups/${groupId}/archive`)).data.data;
+
+export const getRevenues = async (groupId) =>
+  (await api.get(`/revenues/group/${groupId}`)).data.data;

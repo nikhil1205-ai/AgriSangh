@@ -31,9 +31,9 @@ const AppRoutes = () => (
         <Route path="/mygroup" element={<MyGroups />} />
         <Route path="/market" element={<MarketNews />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/create-group" element={<CreateGroup />} />
+        <Route path="/join-group" element={<JoinGroup />} />
       </Route>
-      <Route path="/create-group" element={<CreateGroup />} />
-      <Route path="/join-group" element={<JoinGroup />} />
       <Route path="/group/:id" element={<GroupRoom />} />
       <Route element={<RoleRoute role="leader" />}>
         <Route path="/leader/group/:id" element={<LeaderRoom />} />
