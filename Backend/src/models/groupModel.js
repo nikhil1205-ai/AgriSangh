@@ -3,10 +3,25 @@ const Counter = require("./counterModel");
 
 const groupSchema = new mongoose.Schema(
   {
-    groupId: { type: String, required: true, unique: true, index: true },
-    groupName: { type: String, required: true, trim: true, index: true },
+    groupId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    groupName: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
 
-    leader: { type: mongoose.Schema.Types.ObjectId, ref: "Farmer", required: true, index: true },
+    leader: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Farmer",
+      required: true,
+      index: true,
+    },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "Farmer" }],
     joinRequests: [
       {
@@ -18,8 +33,27 @@ const groupSchema = new mongoose.Schema(
 
     cropFocus: { type: String, trim: true, index: true },
     cropSeason: { type: String, trim: true, index: true },
-    totalOperationalLand: { type: Number, default: 0 },
-    status: { type: String, enum: ["active", "completed", "archived"], default: "active", index: true },
+
+    // Represents total expected crop production of collective group (in quintals)
+    estimatedCropSize: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // Link to Contribution collection
+    contributionId: {
+      type: String,
+      unique: true,
+      index: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["active", "completed", "archived"],
+      default: "active",
+      index: true,
+    },
 
     village: { type: String, trim: true, index: true },
     district: { type: String, trim: true, index: true },
@@ -48,6 +82,10 @@ const groupSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+/**
+ * Generate group ID
+ * Format: AGS-GRP-0001
+ */
 groupSchema.statics.generateGroupId = async function generateGroupId() {
   const seq = await Counter.next("group", { startAt: 1 });
   return `AGS-GRP-${String(seq).padStart(4, "0")}`;
@@ -55,4 +93,3 @@ groupSchema.statics.generateGroupId = async function generateGroupId() {
 
 const Group = mongoose.model("Group", groupSchema);
 module.exports = Group;
-

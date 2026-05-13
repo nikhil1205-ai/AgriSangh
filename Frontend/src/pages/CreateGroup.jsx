@@ -25,7 +25,8 @@ const CreateGroup = () => {
     village: "",
     cropFocus: "",
     cropSeason: "",
-    totalExpectedLand: "",
+    estimatedCropSize: "",
+    leaderLandSize: "",
     description: "",
   });
 
@@ -118,7 +119,7 @@ const CreateGroup = () => {
             { icon: MapPin, name: "village", placeholder: "Village" },
             { icon: Sprout, name: "cropFocus", placeholder: "Crop Focus" },
             { icon: Calendar, name: "cropSeason", placeholder: "Crop Season" },
-            { icon: Maximize, name: "totalExpectedLand", placeholder: "Total Land (Acres)" },
+            { icon: Maximize, name: "estimatedCropSize", placeholder: "Total Expected Crop (Quintals)" },
           ].map((field) => (
             <div key={field.name} className="relative group">
               <field.icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-800" size={18} />

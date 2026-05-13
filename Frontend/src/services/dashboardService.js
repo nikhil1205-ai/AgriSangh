@@ -23,9 +23,15 @@ export const decideJoinRequest = async (groupId, payload) =>
   (await api.patch(`/groups/${groupId}/requests/decision`, payload)).data.data;
 
 export const addContribution = async (payload) =>
-  (await api.post("/contributions", payload)).data.data;
+  (await api.post("/contributions/create", payload)).data.data;
+export const updateContribution = async (contributionId, payload) =>
+  (await api.put(`/contributions/${contributionId}`, payload)).data.data;
 export const getContributions = async (groupId) =>
-  (await api.get(`/contributions/${groupId}`)).data.data;
+  (await api.get(`/contributions/group/${groupId}`)).data.data;
+export const getContributionById = async (contributionId) =>
+  (await api.get(`/contributions/id/${contributionId}`)).data.data;
+export const deleteContribution = async (contributionId) =>
+  (await api.delete(`/contributions/${contributionId}`)).data.data;
 
 export const createBatch = async (payload) => (await api.post("/batches", payload)).data.data;
 export const getBatches = async (groupId) => (await api.get(`/batches/group/${groupId}`)).data.data;
@@ -42,3 +48,11 @@ export const archiveGroup = async (groupId) =>
 
 export const getRevenues = async (groupId) =>
   (await api.get(`/revenues/group/${groupId}`)).data.data;
+export const createRevenue = async (payload) =>
+  (await api.post("/revenues/create", payload)).data.data;
+export const calculateRevenue = async (payload) =>
+  (await api.post("/revenues/calculate", payload)).data.data;
+export const getRevenueStats = async (groupId) =>
+  (await api.get(`/revenues/stats/${groupId}`)).data.data;
+export const getRevenueById = async (revenueId) =>
+  (await api.get(`/revenues/id/${revenueId}`)).data.data;

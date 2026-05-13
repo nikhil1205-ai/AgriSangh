@@ -40,7 +40,7 @@ const RevenuePreview = ({ revenues }) => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">₹{dist.amount.toLocaleString()}</p>
+                  <p className="font-semibold text-gray-900">₹{(dist.amountInQuintal || dist.amount || 0).toLocaleString()}</p>
                 </div>
               </div>
             ))}

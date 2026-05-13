@@ -3,6 +3,12 @@ const Group = require("../models/groupModel");
 const Contribution = require("../models/contributionModel");
 const Batch = require("../models/batchModel");
 const { AppError } = require("../utils/errors");
+const {
+  calculateTotalLand,
+  calculateParticipationPercentages,
+  validateLandContributions,
+  validateEstimatedCropSize,
+} = require("../utils/groupHelpers");
 
 function normalizeSeason(season = "") {
   return String(season || "").trim().toLowerCase();
@@ -21,6 +27,9 @@ async function hasActiveSeasonConflict(farmer, season) {
   return activeGroups.some((g) => getGroupSeason(g) === normalizedSeason);
 }
 
+/**
+ * Create a new group and automatically create corresponding Contribution
+ */
 async function createGroup({ auth, payload }) {
   const leader = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
   if (!leader) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
@@ -34,7 +43,17 @@ async function createGroup({ auth, payload }) {
     );
   }
 
+  // Validate estimated crop size if provided
+  if (payload.estimatedCropSize !== undefined) {
+    const cropValidation = validateEstimatedCropSize(payload.estimatedCropSize);
+    if (!cropValidation.valid) {
+      throw new AppError(cropValidation.error, 400, "VALIDATION_ERROR");
+    }
+  }
+
   const groupId = await Group.generateGroupId();
+  const contributionId = await Contribution.generateContributionId();
+
   const group = await Group.create({
     groupId,
     groupName: payload.groupName,
@@ -42,7 +61,8 @@ async function createGroup({ auth, payload }) {
     members: [leader._id],
     cropFocus: payload.cropFocus,
     cropSeason: payload.cropSeason,
-    totalOperationalLand: Number(payload.totalOperationalLand || payload.totalExpectedLand || 0),
+    estimatedCropSize: Number(payload.estimatedCropSize || 0),
+    contributionId: contributionId,
     village: payload.village,
     district: payload.district,
     state: payload.state,
@@ -53,6 +73,30 @@ async function createGroup({ auth, payload }) {
     },
   });
 
+  // Create corresponding Contribution with leader's land
+  const leaderLandSize = Number(payload.leaderLandSize || payload.totalExpectedLand || 0);
+
+  const landContribution = [
+    {
+      farmer: leader._id,
+      farmerId: leader.farmerId,
+      landSize: leaderLandSize,
+    },
+  ];
+
+  const contribution = await Contribution.create({
+    contributionId,
+    group: group._id,
+    landContribution: calculateParticipationPercentages(landContribution),
+    season: payload.cropSeason,
+  });
+
+  // Update group analytics
+  group.analytics = group.analytics || {};
+  group.analytics.totalContributedLand = leaderLandSize;
+  await group.save();
+
+  // Update leader profile
   leader.role = "leader";
   if (!leader.activeGroups.some((id) => String(id) === String(group._id))) {
     leader.activeGroups.push(group._id);
@@ -101,7 +145,7 @@ async function getGroupDetails(groupId) {
   if (!group) throw new AppError("Group not found", 404, "NOT_FOUND");
 
   const contributions = await Contribution.find({ group: group._id })
-    .populate("farmer")
+    .populate("landContribution.farmer")
     .sort({ createdAt: -1 })
     .limit(200);
 
@@ -110,7 +154,10 @@ async function getGroupDetails(groupId) {
   return { group, contributions, batches };
 }
 
-async function joinGroup({ auth, groupId, directJoin = false }) {
+/**
+ * Join group and automatically update Contribution
+ */
+async function joinGroup({ auth, groupId, directJoin = false, landSize = 0 }) {
   const farmer = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
   if (!farmer) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
 
@@ -143,8 +190,51 @@ async function joinGroup({ auth, groupId, directJoin = false }) {
   }
 
   const already = group.members.some((m) => String(m) === String(farmer._id));
+
   if (!already) {
+    // Add farmer to group
     group.members.push(farmer._id);
+
+    // Update Contribution - add new farmer and recalculate all percentages
+    if (group.contributionId) {
+      const contribution = await Contribution.findOne({ contributionId: group.contributionId });
+
+      if (contribution) {
+        // Check if farmer already in contribution
+        const farmerExists = contribution.landContribution.some(
+          (c) => String(c.farmer) === String(farmer._id)
+        );
+
+        if (!farmerExists) {
+          // Add new farmer's land contribution
+          const newLandEntry = {
+            farmer: farmer._id,
+            farmerId: farmer.farmerId,
+            landSize: Number(landSize || 0),
+          };
+
+          contribution.landContribution.push(newLandEntry);
+
+          // Recalculate total land and all participation percentages
+          const totalLand = calculateTotalLand(contribution.landContribution);
+          contribution.totalLand = totalLand;
+
+          if (totalLand > 0) {
+            // Recalculate all participation percentages
+            contribution.landContribution = calculateParticipationPercentages(
+              contribution.landContribution
+            );
+          }
+
+          await contribution.save();
+        }
+      }
+    }
+
+    // Update group analytics
+    group.analytics = group.analytics || {};
+    group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + Number(landSize || 0);
+
     await group.save();
   }
 
@@ -192,7 +282,7 @@ async function decideJoinRequest({ auth, groupId, payload }) {
     throw new AppError("Leader-only action", 403, "FORBIDDEN");
   }
 
-  const reqEntry = (group.joinRequests || []).id(payload.requestId);
+  const reqEntry = (group.joinRequests || []).find((r) => String(r._id) === String(payload.requestId));
   if (!reqEntry) throw new AppError("Request not found", 404, "NOT_FOUND");
 
   const action = payload.action;
@@ -214,11 +304,52 @@ async function decideJoinRequest({ auth, groupId, payload }) {
           "VALIDATION_ERROR"
         );
       }
+
+      const landSize = Number(payload.landSize || 0);
+
       const already = group.members.some((m) => String(m) === String(targetFarmer._id));
       if (!already) {
         group.members.push(targetFarmer._id);
+
+        // Update Contribution
+        if (group.contributionId) {
+          const contribution = await Contribution.findOne({ contributionId: group.contributionId });
+
+          if (contribution) {
+            const farmerExists = contribution.landContribution.some(
+              (c) => String(c.farmer) === String(targetFarmer._id)
+            );
+
+            if (!farmerExists) {
+              const newLandEntry = {
+                farmer: targetFarmer._id,
+                farmerId: targetFarmer.farmerId,
+                landSize: landSize,
+              };
+
+              contribution.landContribution.push(newLandEntry);
+
+              const totalLand = calculateTotalLand(contribution.landContribution);
+              contribution.totalLand = totalLand;
+
+              if (totalLand > 0) {
+                contribution.landContribution = calculateParticipationPercentages(
+                  contribution.landContribution
+                );
+              }
+
+              await contribution.save();
+            }
+          }
+        }
+
+        // Update group analytics
+        group.analytics = group.analytics || {};
+        group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + landSize;
+
         await group.save();
       }
+
       const alreadyActive = targetFarmer.activeGroups.some((g) => String(g) === String(group._id));
       if (!alreadyActive) targetFarmer.activeGroups.push(group._id);
       targetFarmer.groupHistory.push({
@@ -250,7 +381,47 @@ async function removeMember({ auth, groupId, memberUid }) {
     throw new AppError("Cannot remove leader", 400, "VALIDATION_ERROR");
   }
 
+  // Remove from group
   group.members = (group.members || []).filter((m) => String(m) !== String(member._id));
+
+  // Update Contribution - remove member and recalculate percentages
+  if (group.contributionId) {
+    const contribution = await Contribution.findOne({ contributionId: group.contributionId });
+
+    if (contribution) {
+      // Find and remove the member's land contribution
+      const memberContribution = contribution.landContribution.find(
+        (c) => String(c.farmer) === String(member._id)
+      );
+      const removedLandSize = memberContribution ? memberContribution.landSize : 0;
+
+      contribution.landContribution = contribution.landContribution.filter(
+        (c) => String(c.farmer) !== String(member._id)
+      );
+
+      // Recalculate total land and percentages
+      const totalLand = calculateTotalLand(contribution.landContribution);
+      contribution.totalLand = totalLand;
+
+      if (totalLand > 0) {
+        contribution.landContribution = calculateParticipationPercentages(
+          contribution.landContribution
+        );
+      } else {
+        contribution.landContribution = [];
+      }
+
+      await contribution.save();
+
+      // Update group analytics
+      group.analytics = group.analytics || {};
+      group.analytics.totalContributedLand = Math.max(
+        0,
+        Number(group.analytics.totalContributedLand || 0) - removedLandSize
+      );
+    }
+  }
+
   await group.save();
 
   member.activeGroups = (member.activeGroups || []).filter((g) => String(g) !== String(group._id));
@@ -273,7 +444,53 @@ async function leaveGroup({ auth, groupId }) {
     );
   }
 
+  // Find member's contribution before removing
+  let memberContribution = null;
+  if (group.contributionId) {
+    const contribution = await Contribution.findOne({ contributionId: group.contributionId });
+    if (contribution) {
+      memberContribution = contribution.landContribution.find(
+        (c) => String(c.farmer) === String(farmer._id)
+      );
+    }
+  }
+
+  const removedLandSize = memberContribution ? memberContribution.landSize : 0;
+
+  // Remove from group
   group.members = (group.members || []).filter((m) => String(m) !== String(farmer._id));
+
+  // Update Contribution
+  if (group.contributionId) {
+    const contribution = await Contribution.findOne({ contributionId: group.contributionId });
+
+    if (contribution) {
+      contribution.landContribution = contribution.landContribution.filter(
+        (c) => String(c.farmer) !== String(farmer._id)
+      );
+
+      const totalLand = calculateTotalLand(contribution.landContribution);
+      contribution.totalLand = totalLand;
+
+      if (totalLand > 0) {
+        contribution.landContribution = calculateParticipationPercentages(
+          contribution.landContribution
+        );
+      } else {
+        contribution.landContribution = [];
+      }
+
+      await contribution.save();
+
+      // Update group analytics
+      group.analytics = group.analytics || {};
+      group.analytics.totalContributedLand = Math.max(
+        0,
+        Number(group.analytics.totalContributedLand || 0) - removedLandSize
+      );
+    }
+  }
+
   await group.save();
 
   farmer.activeGroups = (farmer.activeGroups || []).filter((g) => String(g) !== String(group._id));
@@ -340,8 +557,14 @@ async function updateGroup({ auth, groupId, payload }) {
   for (const [from, to] of Object.entries(map)) {
     if (payload[from] !== undefined) group[to] = payload[from];
   }
-  if (payload.totalOperationalLand !== undefined || payload.totalExpectedLand !== undefined) {
-    group.totalOperationalLand = Number(payload.totalOperationalLand || payload.totalExpectedLand || 0);
+
+  // Handle estimatedCropSize instead of totalOperationalLand
+  if (payload.estimatedCropSize !== undefined) {
+    const cropValidation = validateEstimatedCropSize(payload.estimatedCropSize);
+    if (!cropValidation.valid) {
+      throw new AppError(cropValidation.error, 400, "VALIDATION_ERROR");
+    }
+    group.estimatedCropSize = Number(payload.estimatedCropSize || 0);
   }
 
   await group.save();

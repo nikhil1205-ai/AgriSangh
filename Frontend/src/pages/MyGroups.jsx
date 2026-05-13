@@ -70,9 +70,20 @@ const MyGroups = () => {
   const g = activeRoom?.group;
 
     const myContributionPct = useMemo(() => {
-      const list = activeRoom?.contributions || [];
-      const match = list.find((c) => c.farmerName === profile?.fullName);
-      if (match?.participationPercent != null) return Number(match.participationPercent);
+      const contributions = activeRoom?.contributions || [];
+      const profileName = profile?.fullName;
+
+      // Search in new landContribution structure
+      for (const contrib of contributions) {
+        const match = (contrib.landContribution || []).find(
+          (land) => land.farmer?.fullName === profileName || land.farmerId === profile?.farmerId
+        );
+        if (match?.participationPercentage != null) {
+          return Number(match.participationPercentage);
+        }
+      }
+
+      // Fallback to old structure
       const last = (data.contributionHistory || []).find((c) => c.groupId === activeGroupId);
       return last?.participationPercent != null ? Number(last.participationPercent) : null;
     }, [activeRoom, profile, data.contributionHistory, activeGroupId]);
@@ -150,23 +161,44 @@ const MyGroups = () => {
         name: g?.location ? `${g.location.state}, ${g.location.district}, ${g.location.village}` : "Location",
         lat: g?.lat || 26.9200,
         lng: g?.lng || 81.1900,
-        members: (activeRoom?.contributions || []).map(c => ({
-          id: c.farmerName,
-          name: c.farmerName,
-          lat: c.lat || 26.9200,
-          lng: c.lng || 81.1900
-        }))
+        members: (() => {
+          const membersList = [];
+          (activeRoom?.contributions || []).forEach(contrib => {
+            (contrib.landContribution || []).forEach(land => {
+              membersList.push({
+                id: land.farmerId || land.farmer?.farmerId || "Unknown",
+                name: land.farmer?.fullName || land.farmerId || "Unknown",
+                lat: 26.9200,
+                lng: 81.1900
+              });
+            });
+          });
+          return membersList;
+        })()
       },
       irrigation: g?.irrigationStatus || "Drip irrigation active",
       progress: g?.progress || "79% crop cycle complete",
       verification: g?.verificationStatus || "Verified batch ID",
-      membersPreview: (activeRoom?.contributions || []).slice(0, 4).map(c => ({
-        id: c.farmerName,
-        name: c.farmerName,
-        role: c.role || "Member",
-        contribution: `${c.participationPercent || 0}%`,
-        avatar: c.farmerName.charAt(0).toUpperCase()
-      }))
+      membersPreview: (() => {
+        // Flatten contributions from new structure (landContribution array)
+        const allContributors = [];
+        (activeRoom?.contributions || []).forEach(contrib => {
+          (contrib.landContribution || []).forEach(land => {
+            allContributors.push({
+              id: land.farmerId || land.farmer?.farmerId || "Unknown",
+              name: land.farmer?.fullName || land.farmerId || "Unknown",
+              percentage: land.participationPercentage || 0
+            });
+          });
+        });
+        return allContributors.slice(0, 4).map(c => ({
+          id: c.id,
+          name: c.name,
+          role: "Member",
+          contribution: `${c.percentage}%`,
+          avatar: c.name.charAt(0).toUpperCase()
+        }));
+      })()
     } : null;
 
     const pastGroups = pastTimeline.map(item => ({

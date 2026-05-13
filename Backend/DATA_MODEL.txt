@@ -1,0 +1,98 @@
+AgriSangh Data Models - Group & Contribution System
+====================================================
+
+1. GROUP MODEL
+--------------
+
+Collection: groups
+
+ATTRIBUTES:
+
+groupId            - Auto-generated unique ID (Format: AGS-GRP-0001)
+groupName          - Name of the group
+leader             - Reference to Farmer (group leader)
+members            - Array of Farmer references
+joinRequests       - Array of join requests
+cropFocus          - Primary crop type
+cropSeason         - Crop season (e.g., "Rabi 2026")
+estimatedCropSize  - Total expected crop production (in quintals)
+contributionId     - Linked Contribution ID (Format: AGS-CNT-000001)
+status             - Group status (active/completed/archived)
+village            - Village name
+district           - District name
+state              - State name
+activeBatch        - Reference to active Batch
+irrigationPlanning - Irrigation method and schedule
+technologyAccess  - Array of technology access
+analytics          - Analytics data (estimatedYield, totalContributedLand)
+cropPlanning       - Crop planning details
+createdAt          - Timestamp of creation
+updatedAt          - Timestamp of last update
+
+
+2. CONTRIBUTION MODEL
+---------------------
+
+Collection: contributions
+
+ATTRIBUTES:
+
+contributionId      - Auto-generated unique ID (Format: AGS-CNT-000001)
+group               - Reference to Group
+totalLand           - Total combined land of all farmers (in acres)
+landContribution    - Array of farmer land contributions
+  [].farmer         - Reference to Farmer
+  [].farmerId       - Farmer's unique ID
+  [].landSize       - Land size in acres
+  [].participationPercentage - Farmer's participation % (auto-calculated)
+season              - Crop season
+createdAt           - Timestamp of creation
+updatedAt           - Timestamp of last update
+
+Formula: participationPercentage = (farmer_land / total_land) * 100
+
+
+3. API ENDPOINTS
+----------------
+
+GROUPS:
+
+POST   /groups                    - Create group (auto-creates Contribution)
+GET    /groups                    - List groups
+GET    /groups/:groupId           - Get group details
+PATCH  /groups/:groupId           - Update group
+POST   /groups/join               - Join group (auto-updates Contribution)
+PATCH  /groups/:groupId/leave     - Leave group
+PATCH  /groups/:groupId/archive   - Archive group
+
+CONTRIBUTIONS:
+
+POST   /contributions/create     - Create group contribution
+PUT    /contributions/:contributionId - Update contribution
+GET    /contributions/group/:groupId - Get all for group
+GET    /contributions/id/:contributionId - Get single by ID
+DELETE /contributions/:contributionId - Delete contribution
+
+
+4. AUTO-CREATION LOGIC
+---------------------
+
+When creating a group:
+- Generate groupId (AGS-GRP-XXXX)
+- Generate contributionId (AGS-CNT-XXXXXX)
+- Link contributionId to Group
+- Auto-create Contribution with leader's land entry
+- Calculate leader's participation percentage
+- Store estimatedCropSize in Group (not in Contribution)
+
+When farmer joins group:
+- Add farmer to Group.members
+- Add farmer to Contribution.landContribution
+- Recalculate totalLand
+- Recalculate ALL participation percentages
+
+When farmer leaves group:
+- Remove farmer from Group.members
+- Remove farmer from Contribution.landContribution
+- Recalculate totalLand
+- Recalculate ALL participation percentages

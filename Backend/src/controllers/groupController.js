@@ -22,8 +22,9 @@ function toGroupCard(group) {
     cropFocus: group.cropFocus,
     cropSeason: group.cropSeason,
     status: group.status,
-    totalExpectedLand: group.totalOperationalLand,
-    totalOperationalLand: group.totalOperationalLand,
+    estimatedCropSize: group.estimatedCropSize,
+    contributionId: group.contributionId,
+    totalExpectedLand: group.estimatedCropSize,
     location: { state: group.state, district: group.district, village: group.village },
     cropPlan: {
       season: group.cropSeason || group.cropPlanning?.season,
@@ -97,14 +98,14 @@ async function details(req, res, next) {
           : null,
         irrigationPlan: group.irrigationPlanning || null,
         technologyAccess: group.technologyAccess || [],
+        contributionId: group.contributionId,
+        estimatedCropSize: group.estimatedCropSize,
       },
       contributions: (contributions || []).map((c) => ({
         id: c.contributionId,
         contributionId: c.contributionId,
-        farmerName: c.farmer?.fullName || "Farmer",
+        totalLand: c.totalLand,
         landContribution: c.landContribution,
-        participationPercent: c.participationPercentage,
-        estimatedProduction: c.estimatedYield,
         season: c.season,
         createdAt: c.createdAt,
       })),
@@ -130,6 +131,7 @@ async function join(req, res, next) {
       auth: req.auth,
       groupId: req.body.groupId,
       directJoin: Boolean(req.body.directJoin),
+      landSize: req.body.landSize || 0,
     });
     return ok(res, result, "Joined group");
   } catch (err) {
