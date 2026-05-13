@@ -225,11 +225,7 @@ const GroupRoom = () => {
   };
 
   const handleExitAction = () => {
-    if (isLeader) {
-      handleArchiveGroup();
-    } else {
-      handleLeaveGroup();
-    }
+    navigate("/dashboard");
   };
 
   if (!group) {
@@ -268,7 +264,7 @@ const GroupRoom = () => {
       case "timeline":
         return <SeasonalTimeline group={group} />;
       case "settings":
-        return <GroupSettings group={group} role={isLeader ? "leader" : "farmer"} onUpdate={handleUpdateGroup} onTransfer={handleTransferLeadership} onArchive={handleArchiveGroup} />;
+        return <GroupSettings group={group} role={isLeader ? "leader" : "farmer"} onUpdate={handleUpdateGroup} onTransfer={handleTransferLeadership} onArchive={handleArchiveGroup} onLeave={handleLeaveGroup} />;
       default:
         return (
           <div className="space-y-6">

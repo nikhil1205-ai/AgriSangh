@@ -5,7 +5,6 @@ import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 import FarmerDashboard from "../pages/FarmerDashboard";
-import LeaderDashboard from "../pages/LeaderDashboard";
 import BuyerVerification from "../pages/BuyerVerification";
 import Profile from "../pages/Profile";
 import CreateGroup from "../pages/CreateGroup";
@@ -25,7 +24,6 @@ const AppRoutes = () => (
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<FarmerDashboard />} />
         <Route path="/dashboard/farmer" element={<FarmerDashboard />} />
-        <Route path="/dashboard/leader" element={<LeaderDashboard />} />
         <Route path="/mygroup" element={<MyGroups />} />
         <Route path="/market" element={<MarketNews />} />
         <Route path="/profile" element={<Profile />} />

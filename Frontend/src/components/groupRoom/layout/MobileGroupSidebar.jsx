@@ -12,7 +12,7 @@ const menuItems = [
   { id: "technology", label: "Technology Access", icon: Cpu },
   { id: "analytics", label: "Analytics", icon: Activity },
   { id: "timeline", label: "Seasonal Timeline", icon: Activity },
-  { id: "settings", label: "Group Settings", icon: Settings, leaderOnly: true },
+  { id: "settings", label: "Group Settings", icon: Settings },
 ];
 
 const MobileGroupSidebar = ({ open, activeTab, setActiveTab, group, profile, isLeader, onClose, onExit }) => {
@@ -63,7 +63,7 @@ const MobileGroupSidebar = ({ open, activeTab, setActiveTab, group, profile, isL
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">{isLeader ? "Leader" : "Farmer"}</p>
           </div>
           <button onClick={onExit} className="mt-4 flex w-full items-center justify-center rounded-3xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500">
-            Exit Group
+            Exit Group Room
           </button>
         </div>
       </aside>

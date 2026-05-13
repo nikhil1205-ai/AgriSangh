@@ -14,7 +14,7 @@ const menuItems = [
   { id: "technology", label: "Technology Access", icon: Cpu },
   { id: "analytics", label: "Analytics", icon: Activity },
   { id: "timeline", label: "Seasonal Timeline", icon: Activity },
-  { id: "settings", label: "Group Settings", icon: Settings, leaderOnly: true },
+  { id: "settings", label: "Group Settings", icon: Settings },
 ];
 
 const GroupSidebar = ({ activeTab, setActiveTab, group, profile, isLeader, onExit }) => {
@@ -110,7 +110,7 @@ const GroupSidebar = ({ activeTab, setActiveTab, group, profile, isLeader, onExi
           onClick={onExit}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-3xl bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
         >
-          <LogOut size={16} /> Exit Group
+          <LogOut size={16} /> Exit Group Room
         </button>
       </div>
     </div>
