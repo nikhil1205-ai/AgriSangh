@@ -1,4 +1,4 @@
-const GroupOverview = ({ group, summary, activity }) => {
+const GroupOverview = ({ group, summary }) => {
   return (
     <div className="bg-white/70 backdrop-blur-sm border border-white/60 rounded-[28px] p-6 shadow-xl">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -19,8 +19,8 @@ const GroupOverview = ({ group, summary, activity }) => {
           <p className="mt-3 text-3xl font-bold">{group?.members?.length || 0}</p>
         </div>
         <div className="rounded-3xl bg-white p-5 shadow-sm">
-          <p className="text-xs uppercase text-slate-500">Operational Land</p>
-          <p className="mt-3 text-2xl font-semibold text-slate-900">{summary?.land || group?.totalOperationalLand || 0} acres</p>
+          <p className="text-xs uppercase text-slate-500">Total Group Land</p>
+          <p className="mt-3 text-2xl font-semibold text-slate-900">{summary?.land || 0} acres</p>
         </div>
         <div className="rounded-3xl bg-white p-5 shadow-sm">
           <p className="text-xs uppercase text-slate-500">Active Batch</p>
@@ -52,25 +52,6 @@ const GroupOverview = ({ group, summary, activity }) => {
           <p className="mt-2 font-semibold text-slate-900">{group?.cropPlan?.timeline || "Planning stage"}</p>
           <p className="mt-1 text-sm text-slate-600">Irrigation: {group?.irrigationPlanning?.method || "Not scheduled"}</p>
         </div>
-      </div>
-
-      <div className="mt-8 rounded-3xl border border-slate-100 bg-slate-50 p-5">
-        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-[0.2em]">Recent Activity</h3>
-        <ul className="mt-4 space-y-3 text-sm text-slate-700">
-          {activity?.length ? (
-            activity.map((entry, index) => (
-              <li key={index} className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-green-50 text-green-700">{entry.icon}</span>
-                <div>
-                  <p className="font-medium text-slate-900">{entry.title}</p>
-                  <p className="text-sm text-slate-500">{entry.detail}</p>
-                </div>
-              </li>
-            ))
-          ) : (
-            <li className="text-slate-500">No recent activity yet. Collaboration will appear here as your group moves through the season.</li>
-          )}
-        </ul>
       </div>
     </div>
   );

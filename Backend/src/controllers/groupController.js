@@ -131,7 +131,6 @@ async function join(req, res, next) {
       auth: req.auth,
       groupId: req.body.groupId,
       directJoin: Boolean(req.body.directJoin),
-      landSize: req.body.landSize || 0,
     });
     return ok(res, result, "Joined group");
   } catch (err) {

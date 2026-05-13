@@ -37,7 +37,7 @@ const ActiveGroupCard = ({ group, isLeader }) => {
             </div>
             <div className="rounded-3xl bg-slate-50 p-5 border border-slate-200/70">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Operational land</p>
-              <p className="mt-3 text-2xl font-bold text-slate-900">{group.landArea}</p>
+              <p className="mt-3 text-2xl font-bold text-slate-900">{group.totalLand}</p>
             </div>
             <div className="rounded-3xl bg-slate-50 p-5 border border-slate-200/70">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Your contribution</p>

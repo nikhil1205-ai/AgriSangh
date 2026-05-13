@@ -103,35 +103,14 @@ const GroupRoom = () => {
 
   const summary = useMemo(
     () => ({
-      land: group?.totalExpectedLand || group?.totalOperationalLand || 0,
+      land: room.contributions?.[0]?.totalLand || group?.totalExpectedLand || group?.totalOperationalLand || 0,
       activeBatch: group?.batches?.length ? group.batches[0]?.batchId || group.batches[0]?.cropType : "None",
       yield: analytics?.projectedYield || analytics?.yield || group?.projectedYield || 0,
       revenue: group?.revenue?.totalRevenue || analytics?.revenue || 0,
       participation: analytics?.participation || 0,
       batchProgress: analytics?.batchProgress || 0,
     }),
-    [analytics, group]
-  );
-
-  const activity = useMemo(
-    () => [
-      {
-        icon: "🌾",
-        title: "Crop plan confirmed",
-        detail: group?.cropPlan?.crop ? `Crop plan for ${group.cropPlan.crop} is set.` : "Waiting for leader approval.",
-      },
-      {
-        icon: "💧",
-        title: "Irrigation scheduled",
-        detail: group?.irrigationPlan?.method ? `Next watering on ${group.irrigationPlan.nextDate}` : "No irrigation schedule yet.",
-      },
-      {
-        icon: "📊",
-        title: "Contribution data updated",
-        detail: `${room.contributions?.length || 0} contributions recorded.`,
-      },
-    ],
-    [group, room.contributions]
+    [room.contributions, analytics, group]
   );
 
   const handleCropPlanUpdate = async (payload) => {
@@ -242,6 +221,7 @@ const GroupRoom = () => {
             onApprove={(request) => handleDecision(request, true)}
             onReject={(request) => handleDecision(request, false)}
             onRemove={handleRemoveMember}
+            contributions={room.contributions || []}
           />
         );
       case "chat":
@@ -259,7 +239,7 @@ const GroupRoom = () => {
       case "technology":
         return <TechnologyAccess />;
       case "analytics":
-        return <AnalyticsPanel summary={summary} />;
+        return <AnalyticsPanel summary={summary} contributions={room.contributions} batches={room.batches} members={group.members || []} />;
       case "timeline":
         return <SeasonalTimeline group={group} />;
       case "settings":
@@ -267,15 +247,10 @@ const GroupRoom = () => {
       default:
         return (
           <div className="space-y-6">
-            <GroupOverview group={group} summary={summary} activity={activity} />
+            <GroupOverview group={group} summary={summary} />
             <div className="grid gap-6 xl:grid-cols-2">
               <ContributionBoard contributions={room.contributions} batchLocked={group.status !== "active"} />
-              <AnalyticsPanel summary={summary} />
-            </div>
-            <div className="grid gap-6 xl:grid-cols-3">
-              <IrrigationPlanner irrigation={group.irrigationPlan || group.irrigation} />
-              <TechnologyAccess />
-              <SeasonalTimeline group={group} />
+              <AnalyticsPanel summary={summary} contributions={room.contributions} batches={room.batches} members={group.members || []} />
             </div>
           </div>
         );

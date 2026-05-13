@@ -23,7 +23,7 @@ const OverviewStats = ({ dashboard }) => {
     },
     {
       title: "Operational Land",
-      value: `${dashboard?.totalOperationalLand || 0} acres`,
+      value: `${dashboard?.contributions?.[0]?.totalLand || 0} acres`,
       icon: TrendingUp,
       gradient: "from-cyan-500 to-blue-600",
     },

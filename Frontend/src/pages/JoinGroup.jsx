@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import GroupCard from "../components/groups/GroupCard";
 import { discoverGroups, joinGroup, getFarmerDashboard } from "../services/dashboardService";
 import { motion } from 'framer-motion';
-import { 
-  Handshake, 
-  Search, 
-  MapPin, 
-  Sprout, 
-  Calendar, 
-  Users 
+import {
+  Handshake,
+  Search,
+  MapPin,
+  Sprout,
+  Calendar,
+  Users
 } from 'lucide-react';
 
 const JoinGroup = () => {
@@ -44,10 +44,11 @@ const JoinGroup = () => {
 
   const onJoin = async (groupId) => {
     if (hasActiveGroup) {
-      window.alert("You already have an active group in this season. Leave or archive it before joining another.");
+      window.alert("You already have an active group this season. Leave or archive it before joining another.");
       return;
     }
-    const ok = window.confirm("Join this group? Your profile will be linked to the collective.");
+
+    const ok = window.confirm("Join this group? Your land size will be automatically added from your profile.");
     if (!ok) return;
     try {
       await joinGroup({ groupId, directJoin: true });
@@ -58,14 +59,12 @@ const JoinGroup = () => {
   };
 
   return (
-    /* Centering Wrapper: Centers component in the middle area */
     <div className="min-h-[80vh] w-full flex items-center justify-center p-4 md:p-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-4xl bg-white border border-gray-200 rounded-3xl p-6 md:p-10 shadow-xl shadow-gray-200/40"
       >
-        {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2.5 bg-green-50 rounded-xl">
@@ -75,7 +74,7 @@ const JoinGroup = () => {
               Group Discovery
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-2 bg-green-50 border border-green-100 text-green-800 px-4 py-2.5 rounded-xl">
             <Users size={18} className="shrink-0" />
             <p className="text-xs font-bold uppercase tracking-widest leading-none">
@@ -89,7 +88,6 @@ const JoinGroup = () => {
           )}
         </div>
 
-        {/* Search Section */}
         <div className="mb-8">
           <div className="grid md:grid-cols-4 gap-4">
             <div className="relative group">
@@ -137,7 +135,6 @@ const JoinGroup = () => {
           </button>
         </div>
 
-        {/* Groups Grid */}
         <div className="grid lg:grid-cols-2 gap-4">
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} onJoin={onJoin} disabled={hasActiveGroup} />

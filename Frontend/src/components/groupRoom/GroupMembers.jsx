@@ -1,16 +1,41 @@
 import { useMemo } from "react";
 import { UserPlus, UserMinus, ShieldCheck } from "lucide-react";
 
-const GroupMembers = ({ members = [], role, pendingRequests = [], onApprove, onReject, onRemove }) => {
-  const memberRows = useMemo(() => members.map((member) => ({
-    id: member.id || member._id || member.firebaseUid,
-    name: member.fullName || member.farmerId || "Farmer",
-    farmerId: member.farmerId || "—",
-    land: member.landSize || member.landContribution || 0,
-    participation: member.participationPercentage || 0,
-    role: member.role || "farmer",
-    joinedAt: new Date(member.createdAt || member.joinedAt || Date.now()).toLocaleDateString(),
-  })), [members]);
+const GroupMembers = ({ members = [], role, pendingRequests = [], onApprove, onReject, onRemove, contributions = [] }) => {
+  // Find land contribution for a specific farmer from the grouped contributions
+  const findFarmerContribution = (farmerId) => {
+    for (const contrib of contributions) {
+      const landEntry = (contrib.landContribution || []).find(
+        (land) =>
+          land.farmerId === farmerId ||
+          land.farmer?.farmerId === farmerId ||
+          land.farmer?.firebaseUid === farmerId
+      );
+      if (landEntry) {
+        return landEntry;
+      }
+    }
+    return null;
+  };
+
+  const memberRows = useMemo(() => members.map((member) => {
+    // Backend sends: uid (firebaseUid), farmerId, name (fullName), role
+    const farmerId = member.farmerId || member.uid;
+    const landData = findFarmerContribution(farmerId);
+    const land = landData?.landSize || 0;
+    const participation = landData?.participationPercentage || 0;
+
+    return {
+      // Use uid (firebaseUid) for API calls since backend looks up by firebaseUid
+      id: member.uid || member.id,
+      name: member.name || member.fullName || "Farmer",
+      farmerId: farmerId || "—",
+      land,
+      participation,
+      role: member.role || "farmer",
+      joinedAt: new Date(member.createdAt || member.joinedAt || Date.now()).toLocaleDateString(),
+    };
+  }), [members, contributions]);
 
   return (
     <div className="bg-white/70 backdrop-blur-sm border border-white/60 rounded-[28px] p-6 shadow-xl">

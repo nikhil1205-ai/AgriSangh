@@ -156,8 +156,9 @@ async function getGroupDetails(groupId) {
 
 /**
  * Join group and automatically update Contribution
+ * Uses farmer's landSize from Farmer collection automatically
  */
-async function joinGroup({ auth, groupId, directJoin = false, landSize = 0 }) {
+async function joinGroup({ auth, groupId, directJoin = false }) {
   const farmer = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
   if (!farmer) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
 
@@ -206,11 +207,14 @@ async function joinGroup({ auth, groupId, directJoin = false, landSize = 0 }) {
         );
 
         if (!farmerExists) {
-          // Add new farmer's land contribution
+          // Get farmer's landSize from Farmer collection
+          const farmerLandSize = Number(farmer.landSize || 0);
+
+          // Add new farmer's land contribution using farmer's stored landSize
           const newLandEntry = {
             farmer: farmer._id,
             farmerId: farmer.farmerId,
-            landSize: Number(landSize || 0),
+            landSize: farmerLandSize,
           };
 
           contribution.landContribution.push(newLandEntry);
@@ -227,13 +231,13 @@ async function joinGroup({ auth, groupId, directJoin = false, landSize = 0 }) {
           }
 
           await contribution.save();
+
+          // Update group analytics with farmer's landSize
+          group.analytics = group.analytics || {};
+          group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + farmerLandSize;
         }
       }
     }
-
-    // Update group analytics
-    group.analytics = group.analytics || {};
-    group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + Number(landSize || 0);
 
     await group.save();
   }
@@ -305,7 +309,8 @@ async function decideJoinRequest({ auth, groupId, payload }) {
         );
       }
 
-      const landSize = Number(payload.landSize || 0);
+      // Use farmer's landSize from Farmer collection automatically
+      const farmerLandSize = Number(targetFarmer.landSize || 0);
 
       const already = group.members.some((m) => String(m) === String(targetFarmer._id));
       if (!already) {
@@ -324,7 +329,7 @@ async function decideJoinRequest({ auth, groupId, payload }) {
               const newLandEntry = {
                 farmer: targetFarmer._id,
                 farmerId: targetFarmer.farmerId,
-                landSize: landSize,
+                landSize: farmerLandSize,
               };
 
               contribution.landContribution.push(newLandEntry);
@@ -345,7 +350,7 @@ async function decideJoinRequest({ auth, groupId, payload }) {
 
         // Update group analytics
         group.analytics = group.analytics || {};
-        group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + landSize;
+        group.analytics.totalContributedLand = Number(group.analytics.totalContributedLand || 0) + farmerLandSize;
 
         await group.save();
       }
@@ -375,7 +380,8 @@ async function removeMember({ auth, groupId, memberUid }) {
     throw new AppError("Leader-only action", 403, "FORBIDDEN");
   }
 
-  const member = await Farmer.findOne({ firebaseUid: memberUid });
+  // Look up member by farmerId (not firebaseUid)
+  const member = await Farmer.findOne({ farmerId: memberUid });
   if (!member) throw new AppError("Member not found", 404, "NOT_FOUND");
   if (String(member._id) === String(group.leader)) {
     throw new AppError("Cannot remove leader", 400, "VALIDATION_ERROR");

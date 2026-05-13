@@ -84,9 +84,23 @@ const FarmerDashboard = () => {
   const g = activeRoom?.group;
 
   const myContributionPct = useMemo(() => {
-    const list = activeRoom?.contributions || [];
-    const match = list.find((c) => c.farmerName === profile?.fullName);
-    if (match?.participationPercent != null) return Number(match.participationPercent);
+    const contributions = activeRoom?.contributions || [];
+    const profileName = profile?.fullName;
+    const profileFarmerId = profile?.farmerId;
+
+    // Search in new landContribution structure
+    for (const contrib of contributions) {
+      const match = (contrib.landContribution || []).find(
+        (land) =>
+          land.farmer?.fullName === profileName ||
+          land.farmerId === profileFarmerId
+      );
+      if (match?.participationPercentage != null) {
+        return Number(match.participationPercentage);
+      }
+    }
+
+    // Fallback to old structure
     const last = (data.contributionHistory || []).find((c) => c.groupId === activeGroupId);
     return last?.participationPercent != null ? Number(last.participationPercent) : null;
   }, [activeRoom, profile, data.contributionHistory, activeGroupId]);

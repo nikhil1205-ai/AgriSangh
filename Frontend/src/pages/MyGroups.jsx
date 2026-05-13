@@ -88,14 +88,18 @@ const MyGroups = () => {
       return last?.participationPercent != null ? Number(last.participationPercent) : null;
     }, [activeRoom, profile, data.contributionHistory, activeGroupId]);
   
-    const totalContributionLand = useMemo(
-      () =>
-        (data.contributionHistory || []).reduce(
-          (sum, row) => sum + Number(row.landContribution || 0),
-          0
-        ),
-      [data.contributionHistory]
-    );
+    const totalContributionLand = useMemo(() => {
+      // Get totalLand from new contribution structure
+      const contributions = activeRoom?.contributions || [];
+      if (contributions.length > 0 && contributions[0].totalLand != null) {
+        return contributions[0].totalLand;
+      }
+      // Fallback to old structure
+      return (data.contributionHistory || []).reduce(
+        (sum, row) => sum + Number(row.landContribution || 0),
+        0
+      );
+    }, [activeRoom, data.contributionHistory]);
   
     const batchCountActive = (activeRoom?.batches || []).length;
   
@@ -154,7 +158,7 @@ const MyGroups = () => {
       leader: leaderName,
       members: g?.members?.length || 0,
       membersList: g?.members || [],
-      landArea: `${totalContributionLand} acres`,
+      totalLand: `${totalContributionLand} acres`,
       contribution: myContributionPct ? `${myContributionPct}%` : "0%",
       batchStatus: currentBatch ? "Ready for Dispatch" : "In Progress",
       location: {

@@ -25,7 +25,7 @@ const RevenueBoard = ({ revenue = {} }) => {
           <div key={index} className="rounded-3xl bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3 text-sm text-slate-700">
               <span>{item.farmerId || item.farmer?.farmerId || item.farmer?.fullName || `Share ${index + 1}`}</span>
-              <span className="font-semibold text-slate-900">₹{item.amountInQuintal?.toLocaleString() || item.amount?.toLocaleString() || 0}</span>
+              <span className="font-semibold text-slate-900">₹{item.amount?.toLocaleString() || 0}</span>
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
               <div className="h-2 rounded-full bg-green-600" style={{ width: `${item.percentage || 0}%` }} />
