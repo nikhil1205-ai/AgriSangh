@@ -16,7 +16,6 @@ import GroupSettings from "../components/groupRoom/GroupSettings";
 import GroupLayout from "../components/groupRoom/layout/GroupLayout";
 import GroupSidebar from "../components/groupRoom/layout/GroupSidebar";
 import GroupNavbar from "../components/groupRoom/layout/GroupNavbar";
-import MobileGroupSidebar from "../components/groupRoom/layout/MobileGroupSidebar";
 import {
   archiveGroup,
   createBatch,
@@ -287,16 +286,6 @@ const GroupRoom = () => {
     <GroupLayout
       sidebar={
         <GroupSidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          group={group}
-          profile={profile}
-          isLeader={isLeader}
-          onExit={handleExitAction}
-        />
-      }
-      mobileSidebar={
-        <MobileGroupSidebar
           open={mobileSidebarOpen}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
