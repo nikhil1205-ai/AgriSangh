@@ -240,11 +240,29 @@ const SolutionSection = () => (
 
 const Workflow = () => {
   const steps = [
-    { title: "Registration", desc: "Farmers onboard with KYC and land verification." },
-    { title: "Formation", desc: "AI-assisted grouping of farmers based on geography." },
-    { title: "Coordination", desc: "Unified crop planning and input procurement." },
-    { title: "Harvest", desc: "Collective batch creation and quality tagging." },
-    { title: "Verification", desc: "Direct sale to verified institutional buyers." }
+  {
+    title: "Farmer Registration",
+    desc: "Farmers create digital identities with land details, crop preferences, and operational profiles."
+  },
+
+  {
+    title: "Collective Group Formation",
+    desc: "Small farmers form collaborative farming groups and combine fragmented land operationally."
+  },
+
+  {
+    title: "Collective Crop Planning",
+    desc: "Group members coordinate crop selection, farming timelines, and seasonal operations together."
+  },
+  {
+    title: "Verified Batch Creation",
+    desc: "Collective crop output is converted into a verified production batch with traceable operational records."
+  },
+
+  {
+    title: "Buyer Verification & Revenue Distribution",
+    desc: "Buyers verify collective production details while farmers receive transparent revenue distribution."
+  }
   ];
 
   return (
@@ -306,7 +324,7 @@ const Vision = () => (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 className="text-3xl font-extrabold text-gray-900 mb-8">The Future of Indian Farming</h2>
       <p className="text-xl text-gray-600 italic leading-relaxed">
-        "Our vision is to build the coordination infrastructure that allows the smallest farmer in India to operate with the sophistication of a global agriculture enterprise—without ever giving up their land."
+        "AgriSangh enables fragmented small farmers to operate as one coordinated agricultural unit. Building trust, transparency, and collective scale for the future of Indian farming."
       </p>
       <div className="mt-8 flex justify-center items-center gap-4">
         <div className="h-px w-12 bg-gray-300"></div>
