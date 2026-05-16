@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlusSquare, CheckCircle2, Package, Truck } from "lucide-react";
+import { PlusSquare, CheckCircle2, Package, Truck, UserPlus } from "lucide-react";
 
 const statuses = ["planned", "active", "harvested", "sold"];
 
