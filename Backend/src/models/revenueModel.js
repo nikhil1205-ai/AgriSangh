@@ -23,42 +23,40 @@ const revenueSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // Total operational/group expense (transport, irrigation, labor, storage, etc.)
+    expense: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     // Store farmer-wise revenue share
     distribution: [
       {
         farmer: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Farmer",
-          required: true,
         },
         farmerId: {
           type: String,
           required: true,
         },
-        amountInQuintal: {
+        // Revenue amount in rupees
+        amountInRupee: {
           type: Number,
-          required: true,
+          default: 0,
           min: 0,
         },
-      },
-    ],
-
-    // Store revenue participation percentage
-    // Formula: (farmer_revenue / totalRevenue) * 100
-    percentage: [
-      {
-        farmer: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Farmer",
-          required: true,
+        // Revenue amount in quintals (for produce)
+        amountInQuintal: {
+          type: Number,
+          default: 0,
+          min: 0,
         },
-        farmerId: {
-          type: String,
-          required: true,
-        },
+        // Auto-calculated percentage
         percentage: {
           type: Number,
-          required: true,
+          default: 0,
           min: 0,
           max: 100,
         },
@@ -72,19 +70,20 @@ const revenueSchema = new mongoose.Schema(
 
 /**
  * Pre-save middleware to auto-calculate revenue percentages
+ * Formula: (farmer amountInRupee / totalRevenue) * 100
  */
 revenueSchema.pre("save", function (next) {
   if (this.distribution && this.distribution.length > 0 && this.totalRevenue > 0) {
-    // Auto-calculate percentages if not provided
-    if (!this.percentage || this.percentage.length === 0) {
-      this.percentage = this.distribution.map((entry) => ({
-        farmer: entry.farmer,
-        farmerId: entry.farmerId,
-        percentage: Number(
-          ((entry.amountInQuintal / this.totalRevenue) * 100).toFixed(2)
-        ),
-      }));
-    }
+    // Auto-calculate percentages for each farmer
+    this.distribution = this.distribution.map((entry) => {
+      const amountInRupee = Number(entry.amountInRupee || 0);
+      const percentage = (amountInRupee / this.totalRevenue) * 100;
+
+      return {
+        ...entry,
+        percentage: Number(percentage.toFixed(2)),
+      };
+    });
   }
   next();
 });

@@ -181,16 +181,19 @@ function validateRevenueDistribution(distribution = []) {
   }
 
   distribution.forEach((entry, index) => {
-    if (!entry.farmer) {
-      errors.push(`Entry ${index + 1}: farmer reference is required`);
-    }
-
+    // At least farmerId is required (farmer ObjectId is optional, can be null)
     if (!entry.farmerId) {
       errors.push(`Entry ${index + 1}: farmerId is required`);
     }
 
-    const amount = Number(entry.amountInQuintal || 0);
-    if (amount < 0) {
+    // Validate amounts if provided (allow 0, negative not allowed)
+    const amountRupee = Number(entry.amountInRupee || 0);
+    const amountQuintal = Number(entry.amountInQuintal || 0);
+
+    if (amountRupee < 0) {
+      errors.push(`Entry ${index + 1}: amountInRupee cannot be negative`);
+    }
+    if (amountQuintal < 0) {
       errors.push(`Entry ${index + 1}: amountInQuintal cannot be negative`);
     }
   });

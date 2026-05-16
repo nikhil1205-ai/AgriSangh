@@ -47,12 +47,12 @@ export const archiveGroup = async (groupId) =>
   (await api.patch(`/groups/${groupId}/archive`)).data.data;
 
 export const getRevenues = async (groupId) =>
-  (await api.get(`/revenues/group/${groupId}`)).data.data;
+  (await api.get(`/revenue/group/${groupId}`)).data.data;
 export const createRevenue = async (payload) =>
-  (await api.post("/revenues/create", payload)).data.data;
+  (await api.post("/revenue/create", payload)).data.data;
 export const calculateRevenue = async (payload) =>
-  (await api.post("/revenues/calculate", payload)).data.data;
+  (await api.post("/revenue/calculate", payload)).data.data;
 export const getRevenueStats = async (groupId) =>
-  (await api.get(`/revenues/stats/${groupId}`)).data.data;
+  (await api.get(`/revenue/stats/${groupId}`)).data.data;
 export const getRevenueById = async (revenueId) =>
-  (await api.get(`/revenues/id/${revenueId}`)).data.data;
+  (await api.get(`/revenue/id/${revenueId}`)).data.data;

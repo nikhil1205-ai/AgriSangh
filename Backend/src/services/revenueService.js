@@ -39,6 +39,7 @@ async function calculateRevenueSplit({ auth, payload }) {
   }
 
   const totalRevenue = Number(payload.totalRevenue);
+  const expense = Number(payload.expense) || 0;
 
   // Get all contributions for the group
   const contributions = await Contribution.find({ group: group._id })
@@ -96,6 +97,7 @@ async function calculateRevenueSplit({ auth, payload }) {
     distribution.push({
       farmer: farmerDoc?._id || null,
       farmerId,
+      amountInRupee: Number((normalizedPct / 100) * totalRevenue).toFixed(2),
       amountInQuintal: Number(amountInQuintal.toFixed(2)),
     });
 
@@ -114,8 +116,8 @@ async function calculateRevenueSplit({ auth, payload }) {
     revenueId,
     group: group._id,
     totalRevenue,
+    expense,
     distribution,
-    percentage: percentageArray,
   });
 
   // Update group with revenue information
@@ -161,21 +163,19 @@ async function createRevenueDistribution({ auth, payload }) {
   }
 
   const totalRevenue = Number(payload.totalRevenue);
+  const expense = Number(payload.expense) || 0;
   const distribution = payload.distribution;
-
-  // Calculate percentages based on actual amounts
-  const percentages = calculateRevenuePercentages(distribution, totalRevenue);
 
   // Generate revenue ID
   const revenueId = await Revenue.generateRevenueId();
 
-  // Create revenue record
+  // Create revenue record with distribution (percentages auto-calculated by pre-save middleware)
   const revenue = await Revenue.create({
     revenueId,
     group: group._id,
     totalRevenue,
+    expense,
     distribution,
-    percentage: percentages,
   });
 
   // Update group with revenue information

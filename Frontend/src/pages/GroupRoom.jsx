@@ -233,7 +233,12 @@ const GroupRoom = () => {
       case "batch":
         return <BatchManagement batches={room.batches} role={isLeader ? "leader" : "farmer"} onCreate={handleCreateBatch} onUpdateStatus={() => window.alert("Batch status updates are available after backend integration.")} />;
       case "revenue":
-        return <RevenueBoard revenue={group.revenue || { totalRevenue: 0, distribution: [] }} />;
+        return <RevenueBoard
+          revenue={group.revenue || { totalRevenue: 0, distribution: [] }}
+          group={group}
+          role={isLeader ? "leader" : "farmer"}
+          contributions={room.contributions || []}
+        />;
       case "irrigation":
         return <IrrigationPlanner irrigation={group.irrigationPlan || group.irrigation} />;
       case "technology":
@@ -250,7 +255,7 @@ const GroupRoom = () => {
             <GroupOverview group={group} summary={summary} />
             <div className="grid gap-6 xl:grid-cols-2">
               <ContributionBoard contributions={room.contributions} batchLocked={group.status !== "active"} />
-              <AnalyticsPanel summary={summary} contributions={room.contributions} batches={room.batches} members={group.members || []} />
+              <RevenueBoard revenue={group.revenue || {}} group={group} role={isLeader ? "leader" : "farmer"} contributions={room.contributions || []} />
             </div>
           </div>
         );
