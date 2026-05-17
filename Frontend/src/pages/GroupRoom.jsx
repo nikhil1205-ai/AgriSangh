@@ -231,7 +231,7 @@ const GroupRoom = () => {
       case "contributions":
         return <ContributionBoard contributions={room.contributions} batchLocked={group.status !== "active"} />;
       case "batch":
-        return <BatchManagement batches={room.batches} role={isLeader ? "leader" : "farmer"} onCreate={handleCreateBatch} onUpdateStatus={() => window.alert("Batch status updates are available after backend integration.")} />;
+        return <BatchManagement batches={room.batches} role={isLeader ? "leader" : "farmer"} onCreate={handleCreateBatch} onUpdateStatus={() => loadGroupRoom()} />;
       case "revenue":
         return <RevenueBoard
           revenue={group.revenue || { totalRevenue: 0, distribution: [] }}

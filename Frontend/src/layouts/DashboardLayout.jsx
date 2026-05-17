@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { 
-  LogOut, 
-  Sprout, 
-  UserCircle2, 
-  LayoutDashboard, 
-  Users, 
-  ShieldCheck, 
-  Database, 
-  Bell, 
+import {
+  LogOut,
+  Sprout,
+  UserCircle2,
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
+  Database,
+  Bell,
   Search,
   Menu,
-  X
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";

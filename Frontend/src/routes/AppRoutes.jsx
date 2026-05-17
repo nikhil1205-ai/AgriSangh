@@ -5,7 +5,7 @@ import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 import FarmerDashboard from "../pages/FarmerDashboard";
-import BuyerVerification from "../pages/BuyerVerification";
+import BuyPage from "../pages/BuyPage";
 import Profile from "../pages/Profile";
 import CreateGroup from "../pages/CreateGroup";
 import JoinGroup from "../pages/JoinGroup";
@@ -18,7 +18,7 @@ const AppRoutes = () => (
     <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
-    <Route path="/verify-batch" element={<BuyerVerification />} />
+    <Route path="/buy" element={<BuyPage />} />
 
     <Route element={<ProtectedRoute />}>
       <Route element={<DashboardLayout />}>

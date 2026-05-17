@@ -109,12 +109,9 @@ const Hero = () => (
             AgriSangh is a verified collective farming platform enabling small-hold farmers to operate with industrial scale. Build trust, ensure traceability, and access better markets without changing land ownership.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 sm:justify-center lg:justify-start">
-            <button className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-md text-white bg-green-800 hover:bg-green-900 shadow-sm transition-all">
-              Explore Platform <ArrowRight className="ml-2" size={18} />
-            </button>
-            <button className="flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-bold rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-all">
-              Learn More
-            </button>
+            <Link to="/buy" className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-md text-white bg-green-800 hover:bg-green-900 shadow-sm transition-all">
+              Go to AS Buyers <ArrowRight className="ml-2" size={18} />
+            </Link>
           </div>
         </div>
         <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">

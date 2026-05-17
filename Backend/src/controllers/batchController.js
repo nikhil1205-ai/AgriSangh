@@ -1,5 +1,12 @@
 const { ok } = require("../utils/apiResponse");
-const { createBatch, getBatches, getBatchByBatchId } = require("../services/batchService");
+const {
+  createBatch,
+  getBatches,
+  getBatchByBatchId,
+  updateBatchStage,
+  addBuyerInterest,
+  getAllAvailableBatches,
+} = require("../services/batchService");
 
 async function create(req, res, next) {
   try {
@@ -44,5 +51,52 @@ async function getOne(req, res, next) {
   }
 }
 
-module.exports = { create, listByGroup, verify, getOne };
+async function updateStage(req, res, next) {
+  try {
+    const { stageName, progressStatus, fromDate, endDate } = req.body;
+
+    const batch = await updateBatchStage({
+      auth: req.auth,
+      batchId: req.params.batchId,
+      stageName,
+      progressStatus,
+      fromDate,
+      endDate,
+    });
+    return ok(res, batch, "Stage updated");
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listAvailable(req, res, next) {
+  try {
+    const batches = await getAllAvailableBatches();
+    return ok(res, batches);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function expressInterest(req, res, next) {
+  try {
+    const batch = await addBuyerInterest({
+      batchId: req.params.batchId,
+      buyerData: req.body,
+    });
+    return ok(res, batch, "Interest recorded");
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = {
+  create,
+  listByGroup,
+  verify,
+  getOne,
+  updateStage,
+  listAvailable,
+  expressInterest,
+};
 

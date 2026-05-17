@@ -15,6 +15,21 @@ async function createBatch({ auth, payload }) {
 
   if (!payload.cropType) throw new AppError("Missing cropType", 400, "VALIDATION_ERROR");
 
+  // Check if batch already exists for this group
+  const existingBatch = await Batch.findOne({ group: group._id });
+
+  if (existingBatch) {
+    // Update existing batch instead of creating new one
+    existingBatch.cropType = payload.cropType;
+    existingBatch.season = payload.season || group.cropSeason;
+    existingBatch.estimatedProduction = Number(payload.estimatedProduction || 0);
+    existingBatch.status = payload.status || existingBatch.status;
+    existingBatch.farmersInvolved = group.members;
+    await existingBatch.save();
+    return existingBatch;
+  }
+
+  // Create new batch if doesn't exist
   const batchId = await Batch.generateBatchId({ cropType: payload.cropType });
   const batch = await Batch.create({
     batchId,
@@ -22,7 +37,7 @@ async function createBatch({ auth, payload }) {
     cropType: payload.cropType,
     season: payload.season || group.cropSeason,
     estimatedProduction: Number(payload.estimatedProduction || 0),
-    status: "active",
+    status: payload.status || "active",
     farmersInvolved: group.members,
   });
 
@@ -47,5 +62,68 @@ async function getBatchByBatchId({ batchId }) {
   return batch;
 }
 
-module.exports = { createBatch, getBatches, getBatchByBatchId };
+async function updateBatchStage({ auth, batchId, stageName, progressStatus, fromDate, endDate }) {
+  const farmer = await Farmer.findOne({ firebaseUid: auth.firebaseUid });
+  if (!farmer) throw new AppError("Farmer profile not found", 404, "NOT_FOUND");
+
+  const batch = await Batch.findOne({ batchId });
+  if (!batch) throw new AppError("Batch not found", 404, "NOT_FOUND");
+
+  // Check if user is group leader
+  const group = await Group.findById(batch.group).populate("leader");
+  if (String(group.leader._id) !== String(farmer._id)) {
+    throw new AppError("Only group leader can update batch stages", 403, "FORBIDDEN");
+  }
+
+  const stageIndex = batch.statusTimeline.findIndex((s) => s.stage === stageName);
+  if (stageIndex === -1) throw new AppError("Invalid stage", 400, "VALIDATION_ERROR");
+
+  batch.statusTimeline[stageIndex].progressStatus = progressStatus;
+  if (fromDate) batch.statusTimeline[stageIndex].fromDate = new Date(fromDate);
+  if (endDate) batch.statusTimeline[stageIndex].endDate = new Date(endDate);
+
+  await batch.save();
+  return batch;
+}
+
+async function addBuyerInterest({ batchId, buyerData }) {
+  const batch = await Batch.findOne({ batchId });
+  if (!batch) throw new AppError("Batch not found", 404, "NOT_FOUND");
+
+  batch.buyers.push({
+    buyerName: buyerData.buyerName,
+    businessName: buyerData.businessName,
+    phone: buyerData.phone,
+    email: buyerData.email,
+    quantity: Number(buyerData.quantity) || 0,
+    message: buyerData.message || "",
+    paymentMethod: buyerData.paymentMethod || "Pending",
+    interestedAt: new Date(),
+  });
+
+  await batch.save();
+  return batch;
+}
+
+async function getAllAvailableBatches() {
+  return await Batch.find({
+    $or: [{ status: "active" }, { status: "harvested" }],
+  })
+    .populate({
+      path: "group",
+      select: "groupId groupName leader",
+      populate: { path: "leader", select: "name" },
+    })
+    .sort({ createdAt: -1 })
+    .limit(100);
+}
+
+module.exports = {
+  createBatch,
+  getBatches,
+  getBatchByBatchId,
+  updateBatchStage,
+  addBuyerInterest,
+  getAllAvailableBatches,
+};
 

@@ -8,7 +8,7 @@ const menuItems = [
   { id: "chat", label: "Group Chat", icon: MessageCircle },
   { id: "crop", label: "Crop Planning", icon: Sprout },
   { id: "contributions", label: "Contributions", icon: BarChart3 },
-  { id: "batch", label: "Batch Management", icon: Box, leaderOnly: true },
+  { id: "batch", label: "Batch Management", icon: Box },
   { id: "revenue", label: "Revenue Distribution", icon: DollarSign },
   { id: "irrigation", label: "Irrigation Planning", icon: Droplet },
   { id: "technology", label: "Technology Access", icon: Cpu },

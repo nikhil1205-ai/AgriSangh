@@ -5,8 +5,15 @@ const controller = require("../controllers/batchController");
 // Public buyer verification
 router.get("/verify/:batchId", controller.verify);
 
-// Prompt-style
+// List available batches for buyers (public)
+router.get("/available", controller.listAvailable);
+
+// Express buyer interest (public)
+router.post("/:batchId/interest", controller.expressInterest);
+
+// Leader-only actions
 router.post("/create", requireFirebaseAuth, controller.create);
+router.put("/:batchId/stage", requireFirebaseAuth, controller.updateStage);
 
 // Frontend compatibility
 router.post("/", requireFirebaseAuth, controller.create);

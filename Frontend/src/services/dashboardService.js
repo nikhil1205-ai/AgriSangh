@@ -37,6 +37,11 @@ export const createBatch = async (payload) => (await api.post("/batches", payloa
 export const getBatches = async (groupId) => (await api.get(`/batches/group/${groupId}`)).data.data;
 export const verifyBatch = async (batchId) => (await api.get(`/batches/verify/${batchId}`)).data.data;
 export const getBatchDetails = async (batchId) => (await api.get(`/batches/${batchId}`)).data.data;
+export const updateBatchStage = async (batchId, payload) =>
+  (await api.put(`/batches/${batchId}/stage`, payload)).data.data;
+export const getAvailableBatches = async () => (await api.get("/batches/available")).data.data;
+export const expressBuyerInterest = async (batchId, payload) =>
+  (await api.post(`/batches/${batchId}/interest`, payload)).data.data;
 
 export const getLeaderDashboard = async (groupId) =>
   (await api.get(`/dashboard/leader/${groupId}`)).data.data;
