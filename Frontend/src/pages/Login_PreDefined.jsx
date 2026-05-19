@@ -1,22 +1,27 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 const Login_PreDefined = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
-    const predefinedUser = {
-      email: "nikzone112@gmail.com",
-      password: "nik123",
+    const autoLogin = async () => {
+      try {
+        await login({
+          email: "nikzone112@gmail.com",
+          password: "nik123",
+        });
+
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Predefined Login Failed:", error);
+      }
     };
 
-    // Save predefined user locally
-    localStorage.setItem("user", JSON.stringify(predefinedUser));
-    localStorage.setItem("isAuthenticated", "true");
-
-    // Direct redirect to dashboard
-    navigate("/dashboard");
-  }, [navigate]);
+    autoLogin();
+  }, [login, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">

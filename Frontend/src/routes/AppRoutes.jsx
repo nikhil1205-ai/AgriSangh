@@ -16,6 +16,10 @@ import Login_PreDefined from "../pages/Login_PreDefined";
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<LandingPage />} />
+    
+    {/* <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} /> */}
+
     <Route path="/login" element={<Login_PreDefined />} />
     <Route path="/register" element={<Login_PreDefined />} />
     <Route path="/buy" element={<BuyPage />} />
