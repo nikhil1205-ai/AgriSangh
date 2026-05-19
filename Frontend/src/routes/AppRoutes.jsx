@@ -12,12 +12,12 @@ import JoinGroup from "../pages/JoinGroup";
 import GroupRoom from "../pages/GroupRoom";
 import MyGroups from "../pages/MyGroups";
 import MarketNews from "../pages/MarketNews";
-
+import Login_PreDefined from "../pages/Login_PreDefined";
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<LandingPage />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
+    <Route path="/login" element={<Login_PreDefined />} />
+    <Route path="/register" element={<Login_PreDefined />} />
     <Route path="/buy" element={<BuyPage />} />
 
     <Route element={<ProtectedRoute />}>
