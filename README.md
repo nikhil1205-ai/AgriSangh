@@ -52,16 +52,7 @@ AgriSangh is a full-stack agricultural collaboration platform built to help farm
    ```bash
    npm install
    ```
-3. Create a `.env` file in `Backend/` with the following values:
-   ```env
-   PORT=5000
-   CLIENT_URL=http://localhost:5173
-   JWT_SECRET=your_jwt_secret
-   FIREBASE_PROJECT_ID=your_firebase_project_id
-   FIREBASE_CLIENT_EMAIL=your_firebase_client_email
-   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-   MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/<dbname>?retryWrites=true&w=majority
-   ```
+
 4. Start the backend server:
    ```bash
    npm run dev
@@ -77,14 +68,7 @@ AgriSangh is a full-stack agricultural collaboration platform built to help farm
    ```bash
    npm install
    ```
-3. Create a `.env` file in `Frontend/` with your Firebase config:
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
+
    ```
 4. Start the frontend development server:
    ```bash
