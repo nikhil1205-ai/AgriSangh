@@ -68,8 +68,6 @@ AgriSangh is a full-stack agricultural collaboration platform built to help farm
    ```bash
    npm install
    ```
-
-   ```
 4. Start the frontend development server:
    ```bash
    npm run dev
@@ -91,7 +89,7 @@ AgriSangh is a full-stack agricultural collaboration platform built to help farm
 
 ## API Endpoints
 
-The backend API is available at `http://localhost:5000/api` by default.
+The backend API is available at `http://localhost:8080/api` by default.
 
 Common route groups:
 
