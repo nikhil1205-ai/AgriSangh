@@ -17,11 +17,13 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<LandingPage />} />
     
-    {/* <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} /> */}
+    <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} />
 
-    <Route path="/login" element={<Login_PreDefined />} />
-    <Route path="/register" element={<Login_PreDefined />} />
+    /* For testing purposes, we can use the pre-defined login page to quickly access the dashboard without going through the actual login process.  */
+    {/* <Route path="/login" element={<Login_PreDefined />} />
+    <Route path="/register" element={<Login_PreDefined />} /> */}
+
     <Route path="/buy" element={<BuyPage />} />
 
     <Route element={<ProtectedRoute />}>
