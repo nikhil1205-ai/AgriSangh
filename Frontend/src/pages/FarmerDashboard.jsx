@@ -105,14 +105,25 @@ const FarmerDashboard = () => {
     return last?.participationPercent != null ? Number(last.participationPercent) : null;
   }, [activeRoom, profile, data.contributionHistory, activeGroupId]);
 
-  const totalContributionLand = useMemo(
-    () =>
-      (data.contributionHistory || []).reduce(
-        (sum, row) => sum + Number(row.landContribution || 0),
-        0
-      ),
-    [data.contributionHistory]
-  );
+  const totalContributionLand = useMemo(() => {
+    // Prefer totalLand from new activeRoom contributions structure
+    const contributions = activeRoom?.contributions || [];
+    if (contributions.length > 0 && contributions[0].totalLand != null) {
+      return contributions[0].totalLand;
+    }
+
+    // Fallback: sum over contributionHistory; support both numeric and array landContribution
+    return (data.contributionHistory || []).reduce((sum, row) => {
+      const lc = row.landContribution;
+      if (Array.isArray(lc)) {
+        return (
+          sum +
+          lc.reduce((s, land) => s + Number(land.landSize || 0), 0)
+        );
+      }
+      return sum + Number(lc || 0);
+    }, 0);
+  }, [activeRoom, data.contributionHistory]);
 
   const batchCountActive = (activeRoom?.batches || []).length;
 
@@ -383,7 +394,7 @@ const FarmerDashboard = () => {
               <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
                 <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
                   <Activity size={18} className="text-green-700" />
-                  Total contribution (land)
+                  Total land (acres)
                 </span>
                 <span className="font-bold text-slate-900">{totalContributionLand} acres</span>
               </div>
