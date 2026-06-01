@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createGroup, getFarmerDashboard } from "../services/dashboardService";
 import { useAuth } from "../hooks/useAuth";
+import { useAlert } from "../hooks/useAlert";
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -17,6 +18,7 @@ import {
 const CreateGroup = () => {
   const navigate = useNavigate();
   const { profile, setProfile } = useAuth();
+  const { showError, showSuccess } = useAlert();
   const [hasActiveGroup, setHasActiveGroup] = useState(false);
   const [form, setForm] = useState({
     groupName: "",
@@ -56,7 +58,7 @@ const CreateGroup = () => {
   const submit = async (e) => {
     e.preventDefault();
     if (hasActiveGroup) {
-      window.alert("You already have an active group this season. Leave or archive it before creating a new one.");
+      showError("You already have an active group this season. Leave or archive it before creating a new one.");
       return;
     }
     const group = await createGroup(form);
@@ -65,6 +67,7 @@ const CreateGroup = () => {
       const current = prev || profile || {};
       return { ...current, role: "leader", groupId: group.id };
     });
+    showSuccess("Group created successfully");
     navigate(`/group/${group.id}`);
   };
 

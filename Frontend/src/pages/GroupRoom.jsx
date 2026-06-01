@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useAlert } from "../hooks/useAlert";
 import GroupOverview from "../components/groupRoom/GroupOverview";
 import GroupMembers from "../components/groupRoom/GroupMembers";
 import GroupChat from "../components/groupRoom/GroupChat";
@@ -47,6 +48,7 @@ const GroupRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { profile, firebaseUser } = useAuth();
+  const { showError, showSuccess, confirm, showInfo } = useAlert();
   const [room, setRoom] = useState({ group: null, contributions: [], batches: [] });
   const [analytics, setAnalytics] = useState({});
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -118,8 +120,9 @@ const GroupRoom = () => {
       setActionLoading(true);
       await updateCropPlan(id, payload);
       await loadGroupRoom();
+      showSuccess("Crop plan updated successfully");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to update crop plan.");
+      showError(error?.response?.data?.message || error?.message || "Unable to update crop plan.");
     } finally {
       setActionLoading(false);
     }
@@ -130,8 +133,9 @@ const GroupRoom = () => {
       setActionLoading(true);
       await createBatch({ groupId: id, ...payload });
       await loadGroupRoom();
+      showSuccess("Batch created successfully");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to create batch.");
+      showError(error?.response?.data?.message || error?.message || "Unable to create batch.");
     } finally {
       setActionLoading(false);
     }
@@ -142,8 +146,9 @@ const GroupRoom = () => {
       setActionLoading(true);
       await decideJoinRequest(id, { requestId: request.id || request._id, approved });
       await loadGroupRoom();
+      showSuccess(approved ? "Request approved" : "Request rejected");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to update request.");
+      showError(error?.response?.data?.message || error?.message || "Unable to update request.");
     } finally {
       setActionLoading(false);
     }
@@ -154,47 +159,62 @@ const GroupRoom = () => {
       setActionLoading(true);
       await removeMember(id, memberUid);
       await loadGroupRoom();
+      showSuccess("Member removed successfully");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to remove member.");
+      showError(error?.response?.data?.message || error?.message || "Unable to remove member.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleLeaveGroup = async () => {
-    const ok = window.confirm("Leave this group and return to your dashboard?");
+    const ok = await confirm({
+      title: "Leave Group",
+      message: "Leave this group and return to your dashboard?",
+      confirmText: "Leave",
+      cancelText: "Cancel",
+      type: "danger"
+    });
     if (!ok) return;
     try {
       setActionLoading(true);
       await leaveGroup(id);
+      showSuccess("Left group successfully");
       navigate("/dashboard");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to leave group.");
+      showError(error?.response?.data?.message || error?.message || "Unable to leave group.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleArchiveGroup = async () => {
-    const ok = window.confirm("Archive this group and end the current season for everyone?");
+    const ok = await confirm({
+      title: "Archive Group",
+      message: "Archive this group and end the current season for everyone?",
+      confirmText: "Archive",
+      cancelText: "Cancel",
+      type: "danger"
+    });
     if (!ok) return;
     try {
       setActionLoading(true);
       await archiveGroup(id);
+      showSuccess("Group archived successfully");
       navigate("/dashboard");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to archive group.");
+      showError(error?.response?.data?.message || error?.message || "Unable to archive group.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleUpdateGroup = () => {
-    window.alert("Use the group settings panel to update information when backend support is available.");
+    showInfo("Use the group settings panel to update information when backend support is available.");
   };
 
   const handleTransferLeadership = () => {
-    window.alert("Leadership transfer will be available after selecting a member.");
+    showInfo("Leadership transfer will be available after selecting a member.");
   };
 
   const handleQuickAction = (target) => {

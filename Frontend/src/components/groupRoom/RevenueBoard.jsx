@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { Plus, X, Check, AlertCircle, Users, DollarSign, Percent } from "lucide-react";
+import { useAlert } from "../../hooks/useAlert";
 import { createRevenue } from "../../services/dashboardService";
 
 const RevenueBoard = ({ revenue = {}, group = {}, role = "farmer", contributions = [] }) => {
+  const { showError, showSuccess } = useAlert();
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState({ totalRevenue: "", expense: "", distribution: [] });
   const [errors, setErrors] = useState({});
@@ -142,9 +144,9 @@ const RevenueBoard = ({ revenue = {}, group = {}, role = "farmer", contributions
 
       await createRevenue(payload);
       setIsAdding(false);
-      window.alert("Revenue distributed successfully!");
+      showSuccess("Revenue distributed successfully!");
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Failed to create revenue");
+      showError(error?.response?.data?.message || error?.message || "Failed to create revenue");
     } finally {
       setSubmitting(false);
     }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GroupCard from "../components/groups/GroupCard";
 import { discoverGroups, joinGroup, getFarmerDashboard } from "../services/dashboardService";
+import { useAlert } from "../hooks/useAlert";
 import { motion } from 'framer-motion';
 import {
   Handshake,
@@ -14,6 +15,7 @@ import {
 
 const JoinGroup = () => {
   const navigate = useNavigate();
+  const { showError, showSuccess, confirm } = useAlert();
   const [filters, setFilters] = useState({ search: "", region: "", crop: "", season: "" });
   const [groups, setGroups] = useState([]);
   const [hasActiveGroup, setHasActiveGroup] = useState(false);
@@ -44,17 +46,24 @@ const JoinGroup = () => {
 
   const onJoin = async (groupId) => {
     if (hasActiveGroup) {
-      window.alert("You already have an active group this season. Leave or archive it before joining another.");
+      showError("You already have an active group this season. Leave or archive it before joining another.");
       return;
     }
 
-    const ok = window.confirm("Join this group? Your land size will be automatically added from your profile.");
+    const ok = await confirm({
+      title: "Join Group",
+      message: "Join this group? Your land size will be automatically added from your profile.",
+      confirmText: "Join",
+      cancelText: "Cancel",
+      type: "info"
+    });
     if (!ok) return;
     try {
       await joinGroup({ groupId, directJoin: true });
+      showSuccess("Successfully joined group");
       navigate(`/group/${groupId}`);
     } catch (error) {
-      window.alert(error?.response?.data?.message || error?.message || "Unable to join group.");
+      showError(error?.response?.data?.message || error?.message || "Unable to join group.");
     }
   };
 
