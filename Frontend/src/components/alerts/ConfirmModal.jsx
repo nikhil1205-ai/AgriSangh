@@ -83,7 +83,7 @@ const ConfirmModal = ({ isOpen, options, onConfirm, onCancel }) => {
         </p>
 
         {/* Buttons */}
-        <div className="flex gap-3 justify-center sm:justify-end">
+        <div className="flex gap-3 justify-between">
           <button
             onClick={onCancel}
             className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition font-medium"
