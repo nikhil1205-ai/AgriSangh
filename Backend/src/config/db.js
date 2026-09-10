@@ -1,4 +1,10 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// Fix for Node 18+ / Node 24 DNS SRV resolution issues on Render & cloud environments
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 let isConnected = false;
 
@@ -14,6 +20,7 @@ async function connectDB() {
 
   await mongoose.connect(uri, {
     autoIndex: process.env.NODE_ENV !== "production",
+    serverSelectionTimeoutMS: 5000,
   });
 
   isConnected = true;
