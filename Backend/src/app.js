@@ -14,9 +14,29 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const app = express();
 
 app.use(helmet());
+const allowedOrigins = [
+  "https://agrisanghfrontend.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",").map((url) => url.trim().replace(/\/$/, "")) : []),
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like UptimeRobot, Postman, mobile apps)
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes("*")) {
+        return callback(null, true);
+      }
+      // Allow localhost in development automatically
+      if (cleanOrigin.startsWith("http://localhost:")) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
