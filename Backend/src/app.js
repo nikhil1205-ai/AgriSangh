@@ -22,12 +22,25 @@ app.use(
 );
 app.use(express.json());
 
-app.get("/api/health", (_req, res) =>
-  res.json({
-    success: true,
-    message: "AgriSangh API healthy",
-  })
-);
+const mongoose = require("mongoose");
+
+app.get("/api/health", (_req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
+
+  const healthInfo = {
+    status: isDbConnected ? "UP" : "DOWN",
+    success: isDbConnected,
+    message: isDbConnected ? "Backend API is fully operational" : "Database connection issue",
+    timestamp: new Date().toISOString(),
+    uptime: `${Math.floor(process.uptime())}s`,
+    database: isDbConnected ? "connected" : "disconnected",
+  };
+
+  return res.status(isDbConnected ? 200 : 503).json(healthInfo);
+});
+
+// Alias for /ping endpoint often used by UptimeRobot
+app.get("/ping", (_req, res) => res.status(200).send("PONG"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/farmers", farmerRoutes);
